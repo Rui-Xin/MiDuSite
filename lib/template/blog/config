@@ -1,5 +1,0 @@
-[default]
-index=index.html
-paser=blogEntry.py
-[global]
-blogname=Rui.X's Blog
