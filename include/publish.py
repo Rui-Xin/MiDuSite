@@ -14,13 +14,14 @@ def publish(section):
         return
     mdconfig_template = MDConfig.MDConfig('lib/template/' + template)
     mdconfig = mdconfig_template.merge(mdconfig_src)
+    mdconfig.addSection(section)
     generator = Generator.Generator(mdconfig)
     generator.generate()
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        section = ''
+        section = './'
     else:
         section = sys.argv[1]
 

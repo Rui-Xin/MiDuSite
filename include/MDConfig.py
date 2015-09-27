@@ -33,3 +33,6 @@ class MDConfig:
 
     def get_mdvar(self):
         return MDvar.MDvar(_global=self._global)
+
+    def addSection(self, section):
+        self._default['section'] = section

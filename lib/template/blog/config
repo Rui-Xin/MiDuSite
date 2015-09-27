@@ -1,2 +1,4 @@
 [default]
-template=blog
+paser=BlogEntry.BlogEntry
+[global]
+blogname=MiduBlog
