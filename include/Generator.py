@@ -3,6 +3,8 @@ import MDEntry
 import sys
 import importlib
 import re
+import os
+import shutil
 
 
 class Generator:
@@ -13,6 +15,9 @@ class Generator:
             print "Invalid config file! Skipped.."
         self.default = mdconfig._default
         self.mdvar = mdconfig.get_mdvar()
+        self.src_prefix = 'source/' + self.default['section'] + '/'
+        self.dst_prefix = 'published/' + self.default['section'] + '/'
+        self.tmpl_prefix = 'lib/template/' + self.default['template'] + '/'
         self.initialized = True
 
     def generate(self):
@@ -20,14 +25,21 @@ class Generator:
             print "startpage not found! Skip generating.."
             return
         matchobj = re.match('([^}]*)', self.default['startpage'])
-        print self.generatePage(matchobj)
+
+        if os.path.exists(self.dst_prefix + 'css'):
+                shutil.rmtree(self.dst_prefix)
+        shutil.copytree(self.tmpl_prefix + 'css', self.dst_prefix + 'css')
+
+        print self.generatePage(matchobj) + ' generated.'
 
     def generatePage(self, page):
-        fname = 'lib/template/' + self.default['template'] + \
-            '/page/' + page.group(1) + '.html'
-        with open(fname) as f:
+        fname = self.tmpl_prefix + 'page/' + page.group(1) + '.html'
+        dst_name = self.dst_prefix + page.group(1) + '.html'
+        with open(fname) as f, open(dst_name, 'w') as f_w:
             lines = f.readlines()
-            return self.replace(lines)
+            new_lines = self.replace(lines)
+            f_w.write(''.join(new_lines))
+            return dst_name
         return ''
 
     def generateSnippet(self, snippet):
@@ -37,6 +49,10 @@ class Generator:
             lines = f.readlines()
             return self.replace(lines)
         return []
+
+    def generateList(self, lst):
+
+        pass
 
     def generateGlobal(self, _global):
         varname = _global.group(1)
@@ -61,6 +77,8 @@ class Generator:
                            self.generateGlobal, new_lines, count=0)
         new_lines = re.sub('\$\{LOCAL:([^}]*)\}',
                            self.generateLocal, new_lines, count=0)
+        new_lines = re.sub('\$\{LIST:([^}]*)\}',
+                           self.generateList, new_lines, count=0)
         return new_lines
 
     def get_MDEntry(self):
