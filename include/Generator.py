@@ -57,7 +57,7 @@ class Generator:
         if len(target) < 2:
             print "list " + listcall + "incompleted! Skipped.."
             return
-        snippet = re.match('.*', target[0])
+        snippet = re.match('(.*)', target[0])
         folder = target[1]
         files = filter(lambda x: '.md' in x,
                        os.listdir(self.src_prefix + folder))
@@ -83,7 +83,7 @@ class Generator:
         if varname in self.mdvar._local:
             return self.mdvar._local[varname]
         else:
-            return ''
+            return 'not found'
 
     def replace(self, lines):
         new_lines = re.sub('\$\{PAGE:([^}]*)\}',
@@ -100,11 +100,12 @@ class Generator:
 
     def get_MDEntry(self):
         if 'parser' in self.default:
-            module = self.default['paser'].split('.')
+            module = self.default['parser'].split('.')
         else:
             return MDEntry.MDEntry
 
-        sys.path.insert(0, 'lib/' + self.default['template'] + '/code')
+        sys.path.insert(0, 'lib/template/'
+                        + self.default['template'] + '/code')
         mod = importlib.import_module(module[0])
         klass = getattr(mod, module[1])
         if issubclass(klass, MDEntry.MDEntry):

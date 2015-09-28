@@ -1,27 +1,32 @@
 import MDvar
 
 
-class MDEntry:
+class MDEntry(object):
     'The object properties reading from .md files'
+    meta = {}
 
     def __init__(self, fname):
         with open(fname) as f:
             lines = f.readlines()
             print 'processing ' + fname
-            try:
-                l1 = lines.index('```MiduSite')
-                l2 = lines.index('```')
-            except ValueError:
-                print 'file ' + fname + ' doesn\'t have \
-                    correct meta data, skipped!'
+            l = 0
 
-            meta = {}
+            try:
+                while '```MiDuSite\n' not in lines[l]:
+                    l += 1
+                l1 = l
+                while '```\n' not in lines[l]:
+                    l += 1
+                l2 = l
+            except IndexError:
+                l1 = 0
+                l2 = 0
+
             for line in lines[l1+1:l2]:
                 info = line.split(':')
-                meta[info[0].strip(' ')] = info[1].strip(' ').strip('"')
+                self.meta[info[0].strip(' ')] = info[1].strip(' ').strip('"')
 
-            meta['content'] = lines[l2+1:]
-            self.meta = meta
+            self.meta['content'] = ''.join(lines[l2+1:])
 
     def get_mdvar(self):
         return MDvar.MDvar(_local=self.meta)
