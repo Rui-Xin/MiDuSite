@@ -1,4 +1,5 @@
 [default]
 paser=BlogEntry.BlogEntry
+startpage=index
 [global]
 blogname=MiduBlog
