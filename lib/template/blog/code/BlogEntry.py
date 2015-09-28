@@ -12,4 +12,5 @@ class BlogEntry(MDEntry.MDEntry):
 
     def __init__(self, fname):
         super(BlogEntry, self).__init__(fname)
-        self.meta['description'] = self.meta['content'][:100]
+        self.meta['description'] =\
+            self.meta['content'][:min(1000, len(self.meta['content']))]
