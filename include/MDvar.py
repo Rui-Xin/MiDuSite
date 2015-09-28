@@ -11,6 +11,9 @@ class MDvar:
         if isinstance(_local, dict):
             self._local = _local
 
+    def empty_local(self):
+        self.update_local({})
+
     def update(self, _local, _global):
         self.update_local(_local)
         self.update_global(_global)

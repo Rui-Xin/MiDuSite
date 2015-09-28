@@ -33,8 +33,9 @@ class Generator:
         print self.generatePage(matchobj) + ' generated.'
 
     def generatePage(self, page):
+        pagename = re.search('[^\/]*$', page.group(1)).group(0)
         fname = self.tmpl_prefix + 'page/' + page.group(1) + '.html'
-        dst_name = self.dst_prefix + page.group(1) + '.html'
+        dst_name = self.dst_prefix + pagename + '.html'
         with open(fname) as f, open(dst_name, 'w') as f_w:
             lines = f.readlines()
             new_lines = self.replace(lines)
@@ -51,8 +52,24 @@ class Generator:
         return []
 
     def generateList(self, lst):
+        listcall = lst.group(1)
+        target = re.match('([^\[]*)\[([^\]]*)\]', listcall).groups()
+        if len(target) < 2:
+            print "list " + listcall + "incompleted! Skipped.."
+            return
+        snippet = re.match('.*', target[0])
+        folder = target[1]
+        files = filter(lambda x: '.md' in x,
+                       os.listdir(self.src_prefix + folder))
+        MDEntry = self.get_MDEntry()
 
-        pass
+        list_lines = []
+        for f in files:
+            entry = MDEntry(self.src_prefix + folder + '/' + f)
+            self.mdvar.update_local(entry.get_mdvar()._local)
+            list_lines.append(self.generateSnippet(snippet))
+            self.mdvar.empty_local()
+        return '\n'.join(list_lines)
 
     def generateGlobal(self, _global):
         varname = _global.group(1)
