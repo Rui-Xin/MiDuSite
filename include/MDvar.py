@@ -6,6 +6,7 @@ class MDvar:
     def __init__(self, _local={}, _global={}):
         self._local = _local
         self._global = _global
+        self._localcnt = 1
         self._path = {'root': os.path.relpath(os.path.curdir),
                       'curdir': os.path.relpath(os.path.curdir),
                       'curpage': []}
@@ -50,6 +51,12 @@ class MDvar:
 
     def empty_local(self):
         self.update_local({})
+
+    def inc_cnt(self):
+        self._localcnt += 1
+
+    def res_cnt(self):
+        self._localcnt = 1
 
     def update(self, _local, _global):
         self.update_local(_local)

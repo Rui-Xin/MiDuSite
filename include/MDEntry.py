@@ -1,4 +1,5 @@
 import MDvar
+import markdown
 
 
 class MDEntry(object):
@@ -24,9 +25,12 @@ class MDEntry(object):
 
             for line in lines[l1+1:l2]:
                 info = line.split(':')
-                self.meta[info[0].strip(' ')] = info[1].strip(' ').strip('"')
+                val = [x.strip(' ').strip('"') for x in info[1:]]
+                self.meta[info[0].strip(' ')] = ':'.join(val)
 
-            self.meta['content'] = ''.join(lines[l2+1:])
+            self.meta['origin_content'] = ''.join(lines[l2+1:])
+            self.meta['content'] = \
+                markdown.markdown(self.meta['origin_content'])
 
     def get_mdvar(self):
         return MDvar.MDvar(_local=self.meta)

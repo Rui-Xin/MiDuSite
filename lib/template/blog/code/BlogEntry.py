@@ -1,5 +1,7 @@
 import time
 import MDEntry
+import markdown
+from BeautifulSoup import BeautifulSoup
 
 
 class BlogEntry(MDEntry.MDEntry):
@@ -12,5 +14,8 @@ class BlogEntry(MDEntry.MDEntry):
 
     def __init__(self, fname):
         super(BlogEntry, self).__init__(fname)
+        self.meta['origin_description'] =\
+            self.meta['content'][:min(500, len(self.meta['content']))]
         self.meta['description'] =\
-            self.meta['content'][:min(1000, len(self.meta['content']))]
+            markdown.markdown(BeautifulSoup(self.meta['origin_description'])
+                              .prettify())

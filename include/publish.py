@@ -2,6 +2,9 @@ import sys
 import os
 import Generator
 import MDConfig
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 sys.path.insert(0, 'include')
 
 
