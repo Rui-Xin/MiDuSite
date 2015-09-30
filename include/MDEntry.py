@@ -4,9 +4,9 @@ import markdown
 
 class MDEntry(object):
     'The object properties reading from .md files'
-    meta = {}
 
     def __init__(self, fname):
+        self.meta = {}
         with open(fname) as f:
             lines = f.readlines()
             print 'processing ' + fname

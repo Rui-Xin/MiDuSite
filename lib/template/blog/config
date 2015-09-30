@@ -1,5 +1,5 @@
 [default]
 parser=BlogEntry.BlogEntry
-startpage=index[index]
+startpage=index[dst:index]
 [global]
 blogname=MiduBlog

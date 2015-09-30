@@ -3,13 +3,20 @@ import copy
 
 
 class MDvar:
-    def __init__(self, _local={}, _global={}):
+
+    DEFAULT_LOCAL = {'cnt': 1,
+                     'total_cnt': 0,
+                     'prev_entry': None,
+                     'next_entry': None,
+                     }
+
+    def __init__(self, _local=DEFAULT_LOCAL, _global={}):
         self._local = _local
         self._global = _global
-        self._localcnt = 1
         self._path = {'root': os.path.relpath(os.path.curdir),
                       'curdir': os.path.relpath(os.path.curdir),
-                      'curpage': []}
+                      'curpage': '',
+                      'from_page': ''}
 
     def update_global(self, _global):
         if isinstance(_global, dict):
@@ -23,8 +30,11 @@ class MDvar:
         if isinstance(_path, dict):
             self._path.update(_path)
 
-    def path_changeindex(self, _index):
-        _tochange = os.path.split(_index)
+    def path_changepage(self, _page):
+        _tochange = os.path.split(_page)
+        self._path['from_page'] = \
+            os.path.relpath('.', _tochange[0]) + '/' +\
+            self._path['curpage'] + '.html'
         self.path_cd(_tochange[0])
         self._path['curpage'] = _tochange[1]
 
@@ -35,7 +45,8 @@ class MDvar:
         if type(backup) is dict and \
                 'root' in backup and \
                 'curdir' in backup and \
-                'curpage' in backup:
+                'curpage' in backup and \
+                'from_page' in backup:
             self._path = backup
 
     def path_cd(self, _directory):
@@ -49,14 +60,18 @@ class MDvar:
     def path_getroot(self):
         return os.path.relpath(self._path['root'], self._path['curdir'])
 
-    def empty_local(self):
-        self.update_local({})
+    def local_backup(self):
+        return copy.deepcopy(self._local)
+
+    def local_restore(self, backup):
+        if type(backup) is dict:
+            self._local = backup
 
     def inc_cnt(self):
-        self._localcnt += 1
+        self._local['cnt'] += 1
 
     def res_cnt(self):
-        self._localcnt = 1
+        self._local['cnt'] = 1
 
     def update(self, _local, _global):
         self.update_local(_local)
