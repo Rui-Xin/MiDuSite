@@ -8,6 +8,9 @@ class MDvar:
                      'total_cnt': 0,
                      'prev_entry': None,
                      'next_entry': None,
+                     'md_filename': '',
+                     'md_directory': '',
+                     'in_list': False
                      }
 
     def __init__(self, _local=DEFAULT_LOCAL, _global={}):

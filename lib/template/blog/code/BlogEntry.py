@@ -1,6 +1,5 @@
 import time
 import MDEntry
-import markdown
 from BeautifulSoup import BeautifulSoup
 
 
@@ -14,8 +13,14 @@ class BlogEntry(MDEntry.MDEntry):
 
     def __init__(self, fname):
         super(BlogEntry, self).__init__(fname)
-        self.meta['origin_description'] =\
-            self.meta['content'][:min(500, len(self.meta['content']))]
+
+        reduc_content = BeautifulSoup(self.meta['content'])
+        for tag in ['embed', 'img', 'a']:
+            for match in reduc_content.findAll(tag):
+                match.replaceWithChildren()
+
+        html = unicode(reduc_content.prettify(), 'utf-8')
+        ori_description =\
+            html[:min(300, len(reduc_content.prettify()))].encode('utf-8')
         self.meta['description'] =\
-            markdown.markdown(BeautifulSoup(self.meta['origin_description'])
-                              .prettify())
+            BeautifulSoup(ori_description).prettify()

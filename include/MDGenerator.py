@@ -9,7 +9,7 @@ import shutil
 from collections import OrderedDict
 
 
-class Generator:
+class MDGenerator(object):
     initialized = False
     DEFAULT_HANDLERS = [('GLOBAL', 'generateGlobal'),
                         ('LOCAL', 'generateLocal'),
@@ -65,6 +65,15 @@ class Generator:
     def generatePage(self, page):
         page_info = MiduHelper.parseVar(page.group(1))
         bkpath = self.mdvar.path_backup()
+        if self.mdvar._local['in_list'] is True:
+            dst_directory = \
+                MiduHelper.path_src_to_published(
+                    self.mdvar._local['md_directory'])
+            rel_path = os.path.relpath(
+                dst_directory + '/' + page_info['target'],
+                self.dst_prefix + self.mdvar._path['curdir'])
+            page_info['paras']['dst'] = rel_path
+
         self.mdvar.path_changepage(page_info['paras']['dst'])
         fname = self.tmpl_prefix + 'page/' + \
             page_info['target'] + '.html'
@@ -114,10 +123,23 @@ class Generator:
                        os.listdir(lst_dir))
         MDEntry = self.get_MDEntry()
 
+        entry_list = []
+        for f in sorted(files, reverse=True):
+            entry_list.append(MDEntry(lst_dir + '/' + f))
+
+        if 'mdsort' in self.mdvar._global:
+            sort_file = os.path.split(self.mdvar._global['mdsort'])
+            directory = self.tmpl_prefix + 'code/' + sort_file[0]
+            fname = sort_file[1]
+            fun_name = 'sort'
+            arguments = [entry_list]
+            entry_list = \
+                MiduHelper.fun_call(directory, fname, fun_name, arguments)
+
         entries = OrderedDict()
         self.mdvar.res_cnt()
-        for f in sorted(files, reverse=True):
-            entries[self.mdvar._local['cnt']] = MDEntry(lst_dir + '/' + f)
+        for entry in entry_list:
+            entries[self.mdvar._local['cnt']] = entry
             self.mdvar.inc_cnt()
         total_cnt = len(entries)
 
@@ -132,6 +154,7 @@ class Generator:
                 MiduHelper.od_prev_entry_meta(entries, entry_num)
             self.mdvar._local['next_entry'] = \
                 MiduHelper.od_next_entry_meta(entries, entry_num)
+            self.mdvar._local['in_list'] = True
 
             list_lines.append(self.generateSnippet(snippet))
 
@@ -152,14 +175,14 @@ class Generator:
         call_info = MiduHelper.parseVar(call)
         file_info = os.path.split(call_info['target'])
         fun_info = call_info['paras']
-        sys.path.insert(0, os.path.relpath(self.tmpl_prefix +
-                                           'code/' + file_info[0]))
-        module = importlib.import_module(file_info[1])
-        fun = getattr(module, fun_info['name'])
+
+        directory = os.path.relpath(self.tmpl_prefix + 'code/' + file_info[0])
+        fname = file_info[1]
+        fun_name = fun_info['name']
         para_list = [self]
         if 'arguments' in fun_info:
             para_list.extend(list(fun_info['arguments']))
-        return fun(*para_list)
+        return MiduHelper.fun_call(directory, fname, fun_name, para_list)
 
     def generateGlobal(self, _global):
         varname = _global.group(1)

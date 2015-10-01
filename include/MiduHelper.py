@@ -1,7 +1,9 @@
 import re
+import sys
 import os
 import errno
 import MDEntry
+import importlib
 from collections import OrderedDict
 
 
@@ -30,6 +32,21 @@ def parseVar(inputs):
 
     return {'target': target,
             'paras': paras}
+
+
+def fun_call(directory, fname, fun_name, arguments=[]):
+    sys.path.insert(0, directory)
+    target_module = importlib.import_module(fname)
+    func = getattr(target_module, fun_name)
+    return func(*arguments)
+
+
+def path_src_to_published(path):
+    if path.startswith('source'):
+        return 'published' + path[6:]
+    else:
+        print 'path not started with source/!'
+        raise
 
 
 def od_prev_entry_meta(dic, key):
