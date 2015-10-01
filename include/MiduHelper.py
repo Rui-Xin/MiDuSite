@@ -45,7 +45,7 @@ def path_src_to_published(path):
     if path.startswith('source'):
         return 'published' + path[6:]
     else:
-        print 'path not started with source/!'
+        print 'path ' + path + ' not started with source/!'
         raise
 
 

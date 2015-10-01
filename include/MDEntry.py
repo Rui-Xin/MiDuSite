@@ -1,9 +1,9 @@
-import MDvar
 import markdown
 import re
 import os
 import shutil
 import MiduHelper
+import copy
 
 
 class MDEntry(object):
@@ -13,7 +13,9 @@ class MDEntry(object):
 #                        'latex': 'latex_generator'}
     DEFAULT_HANDLERS = {'img': 'img_generator'}
 
-    def __init__(self, fname):
+    def __init__(self, fname, mdvar):
+        self.mdvar = mdvar
+
         self.meta = {}
         file_info = os.path.split(fname)
         self.meta['md_filename'] = file_info[1]
@@ -46,16 +48,18 @@ class MDEntry(object):
                 self.meta[info[0].strip(' ')] = ':'.join(val)
 
             self.meta['origin_content'] = ''.join(lines[l2+1:])
-            self.meta['content'] = self.processContext(
-                markdown.markdown(self.meta['origin_content']))
+            self.meta['content'] = \
+                markdown.markdown(self.meta['origin_content'])
 
-    def processContext(self, context):
+    def processContext(self):
+        context = self.meta['content']
         for syntax in self.handlers:
             context = re.sub('{\%\ ' + syntax + '\ (.*)\ \%}',
                              self.handlers[syntax],
                              context,
                              count=0)
-        return context
+        self.meta['content'] = context
+        self.post_process()
 
     def addHandler(self, syntax, handler):
         self.handlers[syntax] = handler
@@ -75,7 +79,15 @@ class MDEntry(object):
         return ''.join(IMG_HTML)
 
     def latex_generator(self, matchobj):
-        pass
+        IMG_HTML = ['<p><img src="', '"></p>']
+        latex_f = matchobj.group(1).strip()
+        if not f.startswith('$') and not f.endswith('$'):
+            return latex_f
+        //TODO
+        else:
 
-    def get_mdvar(self):
-        return MDvar.MDvar(_local=self.meta)
+    def get_mdlocal(self):
+        return copy.deepcopy(self.meta)
+
+    def post_process(self):
+        pass

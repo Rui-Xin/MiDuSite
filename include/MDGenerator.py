@@ -124,8 +124,11 @@ class MDGenerator(object):
         MDEntry = self.get_MDEntry()
 
         entry_list = []
+        file_map = {}
         for f in sorted(files, reverse=True):
-            entry_list.append(MDEntry(lst_dir + '/' + f))
+            entry = MDEntry(lst_dir + '/' + f, self.mdvar)
+            entry_list.append(entry)
+            file_map[entry] = f
 
         if 'mdsort' in self.mdvar._global:
             sort_file = os.path.split(self.mdvar._global['mdsort'])
@@ -137,9 +140,11 @@ class MDGenerator(object):
                 MiduHelper.fun_call(directory, fname, fun_name, arguments)
 
         entries = OrderedDict()
+        file_num_map = {}
         self.mdvar.res_cnt()
         for entry in entry_list:
             entries[self.mdvar._local['cnt']] = entry
+            file_num_map[file_map[entry]] = self.mdvar._local['cnt']
             self.mdvar.inc_cnt()
         total_cnt = len(entries)
 
@@ -147,7 +152,10 @@ class MDGenerator(object):
         for entry_num in entries:
             entry = entries[entry_num]
             local_bk = self.mdvar.local_backup()
-            self.mdvar.update_local(entry.get_mdvar()._local)
+            listinfo_bk = self.mdvar.listinfo_backup()
+            self.mdvar._listinfo['list_map'] = file_num_map
+            entry.processContext()
+            self.mdvar.update_local(entry.get_mdlocal())
             self.mdvar._local['cnt'] = str(entry_num)
             self.mdvar._local['total_cnt'] = str(total_cnt)
             self.mdvar._local['prev_entry'] = \
@@ -158,6 +166,7 @@ class MDGenerator(object):
 
             list_lines.append(self.generateSnippet(snippet))
 
+            self.mdvar.listinfo_restore(listinfo_bk)
             self.mdvar.local_restore(local_bk)
         return '\n'.join(list_lines)
 

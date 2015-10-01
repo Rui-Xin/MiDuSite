@@ -11,9 +11,16 @@ class BlogEntry(MDEntry.MDEntry):
             'content': '',
             'description': ''}
 
-    def __init__(self, fname):
-        super(BlogEntry, self).__init__(fname)
+    def __init__(self, fname, mdvar):
+        super(BlogEntry, self).__init__(fname, mdvar)
+        self.addHandler('mdlink', self.mdlink_handler)
 
+    def mdlink_handler(self, matchobj):
+        mdfile = matchobj.group(1)
+        number = self.mdvar._listinfo['list_map'][mdfile]
+        return 'blog' + str(number) + '.html'
+
+    def post_process(self):
         reduc_content = BeautifulSoup(self.meta['content'])
         for tag in ['embed', 'img', 'a']:
             for match in reduc_content.findAll(tag):

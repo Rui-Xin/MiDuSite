@@ -13,6 +13,9 @@ class MDvar:
                      'in_list': False
                      }
 
+    DEFAULT_LISTINFO = {'list_map': {},
+                        'list_root': None}
+
     def __init__(self, _local=DEFAULT_LOCAL, _global={}):
         self._local = _local
         self._global = _global
@@ -20,6 +23,7 @@ class MDvar:
                       'curdir': os.path.relpath(os.path.curdir),
                       'curpage': '',
                       'from_page': ''}
+        self._listinfo = self.DEFAULT_LISTINFO
 
     def update_global(self, _global):
         if isinstance(_global, dict):
@@ -69,6 +73,13 @@ class MDvar:
     def local_restore(self, backup):
         if type(backup) is dict:
             self._local = backup
+
+    def listinfo_backup(self):
+        return copy.deepcopy(self._listinfo)
+
+    def listinfo_restore(self, backup):
+        if type(backup) is dict:
+            self._listinfo = backup
 
     def inc_cnt(self):
         self._local['cnt'] += 1
