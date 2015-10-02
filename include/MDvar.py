@@ -4,17 +4,17 @@ import copy
 
 class MDvar:
 
-    DEFAULT_LOCAL = {'cnt': 1,
-                     'total_cnt': 0,
-                     'prev_entry': None,
-                     'next_entry': None,
-                     'md_filename': '',
-                     'md_directory': '',
-                     'in_list': False
-                     }
+    DEFAULT_LOCAL = {'md_filename': '',
+                     'md_directory': ''}
 
     DEFAULT_LISTINFO = {'list_map': {},
-                        'list_root': None}
+                        'list_root': None,
+                        'cnt': 1,
+                        'total_cnt': 0,
+                        'prev_entry': None,
+                        'next_entry': None,
+                        'in_list': False
+                        }
 
     def __init__(self, _local=DEFAULT_LOCAL, _global={}):
         self._local = _local
@@ -82,10 +82,10 @@ class MDvar:
             self._listinfo = backup
 
     def inc_cnt(self):
-        self._local['cnt'] += 1
+        self._listinfo['cnt'] += 1
 
     def res_cnt(self):
-        self._local['cnt'] = 1
+        self._listinfo['cnt'] = 1
 
     def update(self, _local, _global):
         self.update_local(_local)

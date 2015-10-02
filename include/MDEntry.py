@@ -4,22 +4,24 @@ import os
 import shutil
 import MiduHelper
 import copy
+import urllib2
 
 
 class MDEntry(object):
     'The object properties reading from .md files'
 
-#    DEFAULT_HANDLERS = {'img': 'img_generator',
-#                        'latex': 'latex_generator'}
-    DEFAULT_HANDLERS = {'img': 'img_generator'}
+    DEFAULT_HANDLERS = {'img': 'img_generator',
+                        'latex': 'latex_generator'}
 
     def __init__(self, fname, mdvar):
         self.mdvar = mdvar
-
         self.meta = {}
         file_info = os.path.split(fname)
         self.meta['md_filename'] = file_info[1]
         self.meta['md_directory'] = file_info[0]
+
+        self.img_count = 1
+        self.latex_count = 1
 
         self.handlers = {}
         for syntax in self.DEFAULT_HANDLERS:
@@ -67,24 +69,63 @@ class MDEntry(object):
     def img_generator(self, matchobj):
         IMG_HTML = ['<p><img src="', '"></p>']
         img_file = matchobj.group(1)
-        src = self.meta['md_directory'] + '/' + img_file
-        dst = MiduHelper.path_src_to_published(src)
+        split = list(os.path.split(img_file))
+        new_name = str(self.mdvar._listinfo['cnt']) + '_' + str(self.img_count)
+        split[1] = re.sub('.*(\.[^\.]*)', new_name + r'\1', split[1])
+        new_img_file = os.path.join(*split)
+
+        src = self.mdvar._path['src_prefix'] +\
+            self.mdvar._listinfo['list_root'] +\
+            '/' + img_file
+        dst = self.mdvar._path['dst_prefix'] +\
+            self.mdvar._listinfo['list_root'] +\
+            '/' + new_img_file
 
         dst_directory = os.path.split(dst)[0]
         if not os.path.exists(dst_directory):
             MiduHelper.mkdir_p(dst_directory)
         shutil.copyfile(src, dst)
-        IMG_HTML.insert(1, img_file)
+        IMG_HTML.insert(1, new_img_file)
+
+        self.img_count += 1
 
         return ''.join(IMG_HTML)
 
     def latex_generator(self, matchobj):
+        URL_prefix =\
+            'https://latex.codecogs.com/png.download?%5Cdpi%7B150%7D%20'
         IMG_HTML = ['<p><img src="', '"></p>']
         latex_f = matchobj.group(1).strip()
-        if not f.startswith('$') and not f.endswith('$'):
-            return latex_f
-        //TODO
-        else:
+
+        new_name = str(self.mdvar._listinfo['cnt']) + '_' +\
+            str(self.latex_count) + '.png'
+
+        dst = self.mdvar._path['dst_prefix'] +\
+            self.mdvar._listinfo['list_root'] +\
+            '/css/' + new_name
+
+        dst_directory = os.path.split(dst)[0]
+        if not os.path.exists(dst_directory):
+            MiduHelper.mkdir_p(dst_directory)
+            shutil.copyfile('include/latexnotfound.png',
+                            dst_directory + '/latexnotfound.png')
+
+        if not latex_f.startswith('$') and not latex_f.endswith('$'):
+            print 'latex fomula ' + latex_f + 'format incorrect'
+            return ''
+        latex_f = urllib2.quote(latex_f[1:-1])
+        try:
+            png = urllib2.urlopen(URL_prefix + latex_f).read()
+        except urllib2.URLError:
+            return 'css/latexnotfound.png'
+
+        with open(dst, 'w') as f:
+            f.write(png)
+
+        IMG_HTML.insert(1, 'css/' + new_name)
+        self.latex_count += 1
+
+        return ''.join(IMG_HTML)
 
     def get_mdlocal(self):
         return copy.deepcopy(self.meta)

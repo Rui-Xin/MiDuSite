@@ -15,6 +15,7 @@ class MDGenerator(object):
                         ('LOCAL', 'generateLocal'),
                         ('PATH', 'generatePath'),
                         ('LIST', 'generateList'),
+                        ('LISTINFO', 'generateListinfo'),
                         ('SNIPPET', 'generateSnippet'),
                         ('PAGE', 'generatePage'),
                         ('CALL', 'generateCall')]
@@ -24,9 +25,12 @@ class MDGenerator(object):
             print "Invalid config file! Skipped.."
         self.default = mdconfig._default
         self.mdvar = mdconfig.get_mdvar()
-        self.src_prefix = 'source/' + self.default['section'] + '/'
-        self.dst_prefix = 'published/' + self.default['section'] + '/'
-        self.tmpl_prefix = 'lib/template/' + self.default['template'] + '/'
+        self.mdvar._path['src_prefix'] =\
+            'source/' + self.default['section'] + '/'
+        self.mdvar._path['dst_prefix'] =\
+            'published/' + self.default['section'] + '/'
+        self.mdvar._path['tmpl_prefix'] =\
+            'lib/template/' + self.default['template'] + '/'
         pathlst = {'root': os.path.relpath('./'),
                    'curdir': os.path.relpath('./'),
                    'curpage': ''}
@@ -44,17 +48,20 @@ class MDGenerator(object):
             return
         matchobj = re.match('([^}]*)', self.default['startpage'])
 
-        dst = os.path.relpath(self.dst_prefix + self.mdvar._path['root'])
+        dst = os.path.relpath(self.mdvar._path['dst_prefix'] +
+                              self.mdvar._path['root'])
         if os.path.exists(dst):
                 shutil.rmtree(dst)
         os.mkdir(dst)
 
-        if os.path.exists(self.dst_prefix + self.mdvar._path['root'] + '/css'):
-                shutil.rmtree(self.dst_prefix +
+        if os.path.exists(self.mdvar._path['dst_prefix'] +
+                          self.mdvar._path['root'] + '/css'):
+                shutil.rmtree(self.mdvar._path['dst_prefix'] +
                               self.mdvar._path['root'] +
                               '/css')
-        shutil.copytree(self.tmpl_prefix + '/css',
-                        self.dst_prefix + self.mdvar._path['root'] + '/css')
+        shutil.copytree(self.mdvar._path['tmpl_prefix'] + '/css',
+                        self.mdvar._path['dst_prefix'] +
+                        self.mdvar._path['root'] + '/css')
 
         print self.generatePage(matchobj) + ' generated.'
 
@@ -65,17 +72,17 @@ class MDGenerator(object):
     def generatePage(self, page):
         page_info = MiduHelper.parseVar(page.group(1))
         bkpath = self.mdvar.path_backup()
-        if self.mdvar._local['in_list'] is True:
-            dst_directory = \
-                MiduHelper.path_src_to_published(
-                    self.mdvar._local['md_directory'])
+        if self.mdvar._listinfo['in_list'] is True:
             rel_path = os.path.relpath(
-                dst_directory + '/' + page_info['target'],
-                self.dst_prefix + self.mdvar._path['curdir'])
-            page_info['paras']['dst'] = rel_path
+                self.mdvar._listinfo['list_root'],
+                self.mdvar._path['curdir'])
+            targ_path = rel_path + '/' + page_info['target']
+            page_info['paras']['dst'] = targ_path
 
+        if 'suffix' in page_info['paras']:
+            page_info['paras']['dst'] += page_info['paras']['suffix']
         self.mdvar.path_changepage(page_info['paras']['dst'])
-        fname = self.tmpl_prefix + 'page/' + \
+        fname = self.mdvar._path['tmpl_prefix'] + 'page/' + \
             page_info['target'] + '.html'
         if 'suffix' in page_info['paras']:
             dst_name = self.mdvar._path['curdir'] + '/' +\
@@ -90,9 +97,11 @@ class MDGenerator(object):
             self.mdvar.path_restore(bkpath)
             return dst_name
 
-        MiduHelper.mkdir_p(self.dst_prefix + self.mdvar._path['curdir'])
+        MiduHelper.mkdir_p(self.mdvar._path['dst_prefix'] +
+                           self.mdvar._path['curdir'])
 
-        with open(fname) as f, open(self.dst_prefix + dst_name, 'w') as f_w:
+        with open(fname) as f, open(self.mdvar._path['dst_prefix'] +
+                                    dst_name, 'w') as f_w:
             lines = f.read()
             new_lines = self.replace(lines)
             f_w.write(new_lines)
@@ -118,7 +127,7 @@ class MDGenerator(object):
             return
         snippet = re.match('(.*)', listcall['target'])
         folder = listcall['paras']['dst']
-        lst_dir = self.src_prefix + self.mdvar._path['root'] + '/' + folder
+        lst_dir = self.mdvar._path['src_prefix'] + folder
         files = filter(lambda x: x.endswith('.md'),
                        os.listdir(lst_dir))
         MDEntry = self.get_MDEntry()
@@ -132,7 +141,8 @@ class MDGenerator(object):
 
         if 'mdsort' in self.mdvar._global:
             sort_file = os.path.split(self.mdvar._global['mdsort'])
-            directory = self.tmpl_prefix + 'code/' + sort_file[0]
+            directory = self.mdvar._path['tmpl_prefix'] +\
+                'code/' + sort_file[0]
             fname = sort_file[1]
             fun_name = 'sort'
             arguments = [entry_list]
@@ -143,8 +153,8 @@ class MDGenerator(object):
         file_num_map = {}
         self.mdvar.res_cnt()
         for entry in entry_list:
-            entries[self.mdvar._local['cnt']] = entry
-            file_num_map[file_map[entry]] = self.mdvar._local['cnt']
+            entries[self.mdvar._listinfo['cnt']] = entry
+            file_num_map[file_map[entry]] = self.mdvar._listinfo['cnt']
             self.mdvar.inc_cnt()
         total_cnt = len(entries)
 
@@ -154,20 +164,22 @@ class MDGenerator(object):
             local_bk = self.mdvar.local_backup()
             listinfo_bk = self.mdvar.listinfo_backup()
             self.mdvar._listinfo['list_map'] = file_num_map
+            self.mdvar._listinfo['list_root'] = folder
+            self.mdvar._listinfo['cnt'] = str(entry_num)
+            self.mdvar._listinfo['total_cnt'] = str(total_cnt)
+            self.mdvar._listinfo['prev_entry'] = \
+                MiduHelper.od_prev_entry_meta(entries, entry_num)
+            self.mdvar._listinfo['next_entry'] = \
+                MiduHelper.od_next_entry_meta(entries, entry_num)
+            self.mdvar._listinfo['in_list'] = True
             entry.processContext()
             self.mdvar.update_local(entry.get_mdlocal())
-            self.mdvar._local['cnt'] = str(entry_num)
-            self.mdvar._local['total_cnt'] = str(total_cnt)
-            self.mdvar._local['prev_entry'] = \
-                MiduHelper.od_prev_entry_meta(entries, entry_num)
-            self.mdvar._local['next_entry'] = \
-                MiduHelper.od_next_entry_meta(entries, entry_num)
-            self.mdvar._local['in_list'] = True
 
             list_lines.append(self.generateSnippet(snippet))
 
             self.mdvar.listinfo_restore(listinfo_bk)
             self.mdvar.local_restore(local_bk)
+
         return '\n'.join(list_lines)
 
     def generatePath(self, _path):
@@ -185,7 +197,8 @@ class MDGenerator(object):
         file_info = os.path.split(call_info['target'])
         fun_info = call_info['paras']
 
-        directory = os.path.relpath(self.tmpl_prefix + 'code/' + file_info[0])
+        directory = os.path.relpath(self.mdvar._path['tmpl_prefix'] +
+                                    'code/' + file_info[0])
         fname = file_info[1]
         fun_name = fun_info['name']
         para_list = [self]
@@ -201,9 +214,21 @@ class MDGenerator(object):
             return ''
 
     def generateLocal(self, _local):
+        if not self.mdvar._listinfo['in_list']:
+            return 'not found'
         varname = _local.group(1)
         if varname in self.mdvar._local:
             return self.mdvar._local[varname]
+        else:
+            return 'not found'
+
+    def generateListinfo(self, _listinfo):
+        if not self.mdvar._listinfo['in_list']:
+            print self.mdvar._listinfo
+            return 'not_in_list'
+        varname = _listinfo.group(1)
+        if varname in self.mdvar._listinfo:
+            return self.mdvar._listinfo[varname]
         else:
             return 'not found'
 
