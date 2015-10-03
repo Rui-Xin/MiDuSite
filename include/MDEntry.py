@@ -51,7 +51,8 @@ class MDEntry(object):
 
             self.meta['origin_content'] = ''.join(lines[l2+1:])
             self.meta['content'] = \
-                markdown.markdown(self.meta['origin_content'])
+                markdown.markdown(
+                    self.meta['origin_content'])
 
     def processContext(self):
         context = self.meta['content']
@@ -70,7 +71,7 @@ class MDEntry(object):
         IMG_HTML = ['<p><img src="', '"></p>']
         img_file = matchobj.group(1)
         split = list(os.path.split(img_file))
-        new_name = str(self.mdvar._listinfo['cnt']) + '_' + str(self.img_count)
+        new_name = str(self.mdvar._listinfo['num']) + '_' + str(self.img_count)
         split[1] = re.sub('.*(\.[^\.]*)', new_name + r'\1', split[1])
         new_img_file = os.path.join(*split)
 
@@ -97,7 +98,7 @@ class MDEntry(object):
         IMG_HTML = ['<p><img src="', '"></p>']
         latex_f = matchobj.group(1).strip()
 
-        new_name = str(self.mdvar._listinfo['cnt']) + '_' +\
+        new_name = str(self.mdvar._listinfo['num']) + '_' +\
             str(self.latex_count) + '.png'
 
         dst = self.mdvar._path['dst_prefix'] +\
@@ -117,7 +118,11 @@ class MDEntry(object):
         try:
             png = urllib2.urlopen(URL_prefix + latex_f).read()
         except urllib2.URLError:
-            return 'css/latexnotfound.png'
+            return IMG_HTML[0] + 'css/latexnotfound.png' + IMG_HTML[1]
+
+        if 'Error: Invalid Equation' in png:
+            print 'latex fomula ' + latex_f + 'format incorrect'
+            return ''
 
         with open(dst, 'w') as f:
             f.write(png)

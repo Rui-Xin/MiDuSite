@@ -41,6 +41,15 @@ def fun_call(directory, fname, fun_name, arguments=[]):
     return func(*arguments)
 
 
+def generate_parameter(dct):
+    line = ''
+    if dct is None:
+        return line
+    for key in dct:
+        line += '[' + key + ':' + dct[key] + ']'
+    return line
+
+
 def path_src_to_published(path):
     if path.startswith('source'):
         return 'published' + path[6:]

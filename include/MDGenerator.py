@@ -2,6 +2,8 @@ import MiduHelper
 import MDConfig
 import MDEntry
 import sys
+import copy
+import math
 import importlib
 import re
 import os
@@ -33,10 +35,13 @@ class MDGenerator(object):
             'lib/template/' + self.default['template'] + '/'
         pathlst = {'root': os.path.relpath('./'),
                    'curdir': os.path.relpath('./'),
-                   'curpage': ''}
+                   'curpage': '',
+                   'pg_tmpl': '',
+                   'pg_para': ''}
         self.mdvar.update_path(pathlst)
 
-        self.page_cached = []
+        self.page_cached = {}
+        self.entry_cached = {}
         self.handlers = OrderedDict()
         for default_handler in self.DEFAULT_HANDLERS:
             self.addHandler(default_handler[0], default_handler[1])
@@ -72,7 +77,10 @@ class MDGenerator(object):
     def generatePage(self, page):
         page_info = MiduHelper.parseVar(page.group(1))
         bkpath = self.mdvar.path_backup()
-        if self.mdvar._listinfo['in_list'] is True:
+        self.mdvar._path['pg_tmpl'] = page_info['target']
+        self.mdvar._path['pg_para'] = page_info['paras']
+        if self.mdvar._listinfo['in_list'] and \
+                'dst' not in page_info['paras']:
             rel_path = os.path.relpath(
                 self.mdvar._listinfo['list_root'],
                 self.mdvar._path['curdir'])
@@ -84,17 +92,13 @@ class MDGenerator(object):
         self.mdvar.path_changepage(page_info['paras']['dst'])
         fname = self.mdvar._path['tmpl_prefix'] + 'page/' + \
             page_info['target'] + '.html'
-        if 'suffix' in page_info['paras']:
-            dst_name = self.mdvar._path['curdir'] + '/' +\
-                self.mdvar._path['curpage'] + \
-                page_info['paras']['suffix'] + \
-                '.html'
-        else:
-            dst_name = self.mdvar._path['curdir'] + '/' +\
-                self.mdvar._path['curpage'] + '.html'
+        dst_name = self.mdvar._path['curdir'] + '/' +\
+            self.mdvar._path['curpage'] + '.html'
 
         if dst_name in self.page_cached:
             self.mdvar.path_restore(bkpath)
+            if self.page_cached[dst_name].startswith('renamed:'):
+                return self.page_cached[dst_name].replace('renamed:', '')
             return dst_name
 
         MiduHelper.mkdir_p(self.mdvar._path['dst_prefix'] +
@@ -106,8 +110,9 @@ class MDGenerator(object):
             new_lines = self.replace(lines)
             f_w.write(new_lines)
             self.mdvar.path_restore(bkpath)
-            self.page_cached.append(dst_name)
+            self.page_cached[dst_name] = dst_name
             return dst_name
+
         self.mdvar.path_restore(bkpath)
 
         return ''
@@ -122,65 +127,116 @@ class MDGenerator(object):
 
     def generateList(self, lst):
         listcall = MiduHelper.parseVar(lst.group(1))
-        if listcall['paras'] == '':
+        if 'dst' not in listcall['paras']:
             print "list " + lst.group(1) + "incompleted! Skipped.."
             return
         snippet = re.match('(.*)', listcall['target'])
         folder = listcall['paras']['dst']
         lst_dir = self.mdvar._path['src_prefix'] + folder
-        files = filter(lambda x: x.endswith('.md'),
-                       os.listdir(lst_dir))
-        MDEntry = self.get_MDEntry()
+        self.find_entry(lst_dir)
 
-        entry_list = []
-        file_map = {}
-        for f in sorted(files, reverse=True):
-            entry = MDEntry(lst_dir + '/' + f, self.mdvar)
-            entry_list.append(entry)
-            file_map[entry] = f
-
-        if 'mdsort' in self.mdvar._global:
-            sort_file = os.path.split(self.mdvar._global['mdsort'])
-            directory = self.mdvar._path['tmpl_prefix'] +\
-                'code/' + sort_file[0]
-            fname = sort_file[1]
-            fun_name = 'sort'
-            arguments = [entry_list]
-            entry_list = \
-                MiduHelper.fun_call(directory, fname, fun_name, arguments)
-
-        entries = OrderedDict()
-        file_num_map = {}
-        self.mdvar.res_cnt()
-        for entry in entry_list:
-            entries[self.mdvar._listinfo['cnt']] = entry
-            file_num_map[file_map[entry]] = self.mdvar._listinfo['cnt']
-            self.mdvar.inc_cnt()
-        total_cnt = len(entries)
-
+        entries = self.entry_cached[lst_dir][0]
+        file_num_map = self.entry_cached[lst_dir][1]
+        # TODO: add filter here
+        entries_filtered = entries
+        total_cnt = len(entries_filtered)
         list_lines = []
-        for entry_num in entries:
-            entry = entries[entry_num]
-            local_bk = self.mdvar.local_backup()
-            listinfo_bk = self.mdvar.listinfo_backup()
+
+        listinfo_bk = self.mdvar.listinfo_backup()
+
+        if 'slices' in listcall['paras']:
+            if int(self.mdvar._listinfo['cnt']) == 0:
+                self.mdvar._listinfo['page_total_cnt'] =\
+                    listcall['paras']['slices']
+                pages = [self.mdvar._path['curpage'] + '.html']
+                total_pages = math.ceil(total_cnt*1.0 /
+                                        int(listcall['paras']['slices'])) + 1
+                for i in range(2, int(total_pages + 1)):
+                    pages.append(self.mdvar._path['curpage'] +
+                                 '_' + str(i) + '.html')
+                self.mdvar._listinfo['subpage_list'] = pages
+        else:
+            self.mdvar._listinfo['cnt'] = 0
+            self.mdvar._listinfo['page_total_cnt'] = total_cnt
+
+        cnt = int(self.mdvar._listinfo['cnt'])
+        for slice_num in range(int(self.mdvar._listinfo['page_total_cnt'])):
+            cnt += 1
+            self.mdvar._listinfo['cnt'] = str(cnt)
+            if cnt > total_cnt:
+                self.mdvar._listinfo['cnt'] == '0'
+                self.mdvar._listinfo['subpage_list'] = []
+                break
+
+            cur_index = entries_filtered.keys()[cnt-1]
+            entry = entries_filtered[cur_index]
+
             self.mdvar._listinfo['list_map'] = file_num_map
             self.mdvar._listinfo['list_root'] = folder
-            self.mdvar._listinfo['cnt'] = str(entry_num)
+            self.mdvar._listinfo['num'] = str(cur_index)
+            self.mdvar._listinfo['page_cnt'] = str(slice_num + 1)
+            self.mdvar._listinfo['cnt'] = str(cnt)
             self.mdvar._listinfo['total_cnt'] = str(total_cnt)
             self.mdvar._listinfo['prev_entry'] = \
-                MiduHelper.od_prev_entry_meta(entries, entry_num)
+                MiduHelper.od_prev_entry_meta(entries, cur_index)
             self.mdvar._listinfo['next_entry'] = \
-                MiduHelper.od_next_entry_meta(entries, entry_num)
+                MiduHelper.od_next_entry_meta(entries, cur_index)
             self.mdvar._listinfo['in_list'] = True
+
+            local_bk = self.mdvar.local_backup()
             entry.processContext()
             self.mdvar.update_local(entry.get_mdlocal())
 
             list_lines.append(self.generateSnippet(snippet))
 
-            self.mdvar.listinfo_restore(listinfo_bk)
             self.mdvar.local_restore(local_bk)
 
+        if cnt < total_cnt:
+            idx = self.mdvar._listinfo['subpage_list'].index(
+                self.mdvar._path['curpage'] + '.html') + 1
+            new_page_name = self.mdvar._listinfo['subpage_list'][idx]
+            new_para_dict = copy.deepcopy(self.mdvar._path['pg_para'])
+            new_para_dict.update({'dst': new_page_name.replace('.html', ''),
+                                  'suffix': ''})
+            new_page_para = MiduHelper.generate_parameter(new_para_dict)
+            matchobj = re.match('(.*)',
+                                self.mdvar._path['pg_tmpl'] +
+                                new_page_para)
+            self.generatePage(matchobj)
+
+        self.mdvar.listinfo_restore(listinfo_bk)
         return '\n'.join(list_lines)
+
+    def find_entry(self, lst_dir):
+        if lst_dir not in self.entry_cached:
+            files = filter(lambda x: x.endswith('.md'),
+                           os.listdir(lst_dir))
+            MDEntry = self.get_MDEntry()
+            entry_list = []
+            file_map = {}
+            for f in sorted(files, reverse=True):
+                entry = MDEntry(lst_dir + '/' + f, self.mdvar)
+                entry_list.append(entry)
+                file_map[entry] = f
+
+            if 'mdsort' in self.mdvar._global:
+                sort_file = os.path.split(self.mdvar._global['mdsort'])
+                directory = self.mdvar._path['tmpl_prefix'] +\
+                    'code/' + sort_file[0]
+                fname = sort_file[1]
+                fun_name = 'sort'
+                arguments = [entry_list]
+                entry_list = \
+                    MiduHelper.fun_call(directory, fname, fun_name, arguments)
+
+            entries = OrderedDict()
+            file_num_map = {}
+            i = 1
+            for entry in entry_list:
+                entries[i] = entry
+                file_num_map[file_map[entry]] = i
+                i += 1
+            self.entry_cached[lst_dir] = [entries, file_num_map]
 
     def generatePath(self, _path):
         varname = _path.group(1)

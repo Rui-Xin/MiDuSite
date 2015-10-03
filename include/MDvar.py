@@ -9,11 +9,15 @@ class MDvar:
 
     DEFAULT_LISTINFO = {'list_map': {},
                         'list_root': None,
-                        'cnt': 1,
-                        'total_cnt': 0,
+                        'num': '0',
+                        'cnt': '0',
+                        'page_cnt': '0',
+                        'total_cnt': '0',
+                        'page_total_cnt': '0',
                         'prev_entry': None,
                         'next_entry': None,
-                        'in_list': False
+                        'in_list': False,
+                        'subpage_list': []
                         }
 
     def __init__(self, _local=DEFAULT_LOCAL, _global={}):
@@ -22,7 +26,9 @@ class MDvar:
         self._path = {'root': os.path.relpath(os.path.curdir),
                       'curdir': os.path.relpath(os.path.curdir),
                       'curpage': '',
-                      'from_page': ''}
+                      'from_page': '',
+                      'pg_tmpl': '',
+                      'pg_para': ''}
         self._listinfo = self.DEFAULT_LISTINFO
 
     def update_global(self, _global):
