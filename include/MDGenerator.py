@@ -16,11 +16,11 @@ class MDGenerator(object):
     DEFAULT_HANDLERS = [('GLOBAL', 'generateGlobal'),
                         ('LOCAL', 'generateLocal'),
                         ('PATH', 'generatePath'),
+                        ('CALL', 'generateCall'),
                         ('LIST', 'generateList'),
                         ('LISTINFO', 'generateListinfo'),
                         ('SNIPPET', 'generateSnippet'),
-                        ('PAGE', 'generatePage'),
-                        ('CALL', 'generateCall')]
+                        ('PAGE', 'generatePage')]
 
     def __init__(self, mdconfig):
         if not isinstance(mdconfig, MDConfig.MDConfig):
@@ -107,10 +107,10 @@ class MDGenerator(object):
         with open(fname) as f, open(self.mdvar._path['dst_prefix'] +
                                     dst_name, 'w') as f_w:
             lines = f.read()
+            self.page_cached[dst_name] = dst_name
             new_lines = self.replace(lines)
             f_w.write(new_lines)
             self.mdvar.path_restore(bkpath)
-            self.page_cached[dst_name] = dst_name
             return dst_name
 
         self.mdvar.path_restore(bkpath)
@@ -137,8 +137,7 @@ class MDGenerator(object):
 
         entries = self.entry_cached[lst_dir][0]
         file_num_map = self.entry_cached[lst_dir][1]
-        # TODO: add filter here
-        entries_filtered = entries
+        entries_filtered = self.filter_entries(entries, listcall)
         total_cnt = len(entries_filtered)
         list_lines = []
 
@@ -207,6 +206,17 @@ class MDGenerator(object):
         self.mdvar.listinfo_restore(listinfo_bk)
         return '\n'.join(list_lines)
 
+    def filter_entries(self, entries, listcall):
+        if 'filter' in listcall['paras']:
+            to_filter = listcall['paras']['filter'].split(':')
+            entries_filtered = OrderedDict()
+            for entry in entries:
+                if entries[entry].meta[to_filter[0]] == to_filter[1]:
+                    entries_filtered[entry] = entries[entry]
+            return entries_filtered
+        else:
+            return entries
+
     def find_entry(self, lst_dir):
         if lst_dir not in self.entry_cached:
             files = filter(lambda x: x.endswith('.md'),
@@ -259,7 +269,7 @@ class MDGenerator(object):
         fun_name = fun_info['name']
         para_list = [self]
         if 'arguments' in fun_info:
-            para_list.extend(list(fun_info['arguments']))
+            para_list.extend(list(fun_info['arguments'].split(',')))
         return MiduHelper.fun_call(directory, fname, fun_name, para_list)
 
     def generateGlobal(self, _global):
@@ -280,7 +290,6 @@ class MDGenerator(object):
 
     def generateListinfo(self, _listinfo):
         if not self.mdvar._listinfo['in_list']:
-            print self.mdvar._listinfo
             return 'not_in_list'
         varname = _listinfo.group(1)
         if varname in self.mdvar._listinfo:

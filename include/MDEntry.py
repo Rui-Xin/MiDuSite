@@ -47,7 +47,7 @@ class MDEntry(object):
             for line in lines[l1+1:l2]:
                 info = line.split(':')
                 val = [x.strip(' ').strip('"') for x in info[1:]]
-                self.meta[info[0].strip(' ')] = ':'.join(val)
+                self.meta[info[0].strip(' ')] = ':'.join(val).strip('\n')
 
             self.meta['origin_content'] = ''.join(lines[l2+1:])
             self.meta['content'] = \

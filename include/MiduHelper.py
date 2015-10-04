@@ -26,7 +26,7 @@ def parseVar(inputs):
     for para in paras_raw:
         try:
             para_info = para.split(':')
-            paras[para_info[0]] = para_info[1]
+            paras[para_info[0]] = ':'.join(para_info[1:])
         except IndexError:
             print 'parameter ' + para + ' format wrong.'
 

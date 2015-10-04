@@ -1,0 +1,4 @@
+<div>
+	${CALL:Selector[name:get_cur_tag]}
+	${LIST:post_item[dst:posts][slices:5][filter:tag:${CALL:Selector[name:get_cur_tag]}]}
+</div>
