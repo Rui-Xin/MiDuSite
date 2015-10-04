@@ -176,3 +176,10 @@ h3 {
         bottom: 0;
     }
 }
+
+.custom-restricted {
+	height: 300px;
+	border: None;
+	border-radius: 1px;
+	display: inline-block;
+}

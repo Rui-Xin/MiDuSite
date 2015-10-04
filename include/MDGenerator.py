@@ -97,8 +97,6 @@ class MDGenerator(object):
 
         if dst_name in self.page_cached:
             self.mdvar.path_restore(bkpath)
-            if self.page_cached[dst_name].startswith('renamed:'):
-                return self.page_cached[dst_name].replace('renamed:', '')
             return dst_name
 
         MiduHelper.mkdir_p(self.mdvar._path['dst_prefix'] +
@@ -111,6 +109,7 @@ class MDGenerator(object):
             new_lines = self.replace(lines)
             f_w.write(new_lines)
             self.mdvar.path_restore(bkpath)
+
             return dst_name
 
         self.mdvar.path_restore(bkpath)
