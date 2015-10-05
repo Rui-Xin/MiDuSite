@@ -147,7 +147,8 @@ h3 {
 }
 
 .footer {
-    text-align: center;
+    text-align: left;
+    list-style-type: none;
     padding: 1em 0;
 }
 .footer a {
@@ -157,6 +158,15 @@ h3 {
 .footer .pure-menu a:hover,
 .footer .pure-menu a:focus {
     background: none;
+}
+
+.footerleft {
+    text-align: left;
+    float: left;
+}
+.footerright {
+    text-align: right;
+    float: right;
 }
 
 @media (min-width: 48em) {

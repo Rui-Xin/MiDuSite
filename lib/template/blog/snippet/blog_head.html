@@ -6,7 +6,6 @@
 <title>${GLOBAL:blogname}-${LOCAL:title}</title>
 
 <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
-<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 
 <!--[if lte IE 8]>
   
@@ -21,10 +20,13 @@
 
   
     <!--[if lte IE 8]>
-    <link rel="stylesheet" href="${PATH:root}/css/layouts/blog-old-ie.css">
+        <link rel="stylesheet" href="${PATH:root}/css/layouts/blog-old-ie.css">
     <![endif]-->
     <!--[if gt IE 8]><!-->
     <link rel="stylesheet" href="${PATH:root}/css/layouts/blog.css">
     <!--<![endif]-->
+    <script src="${PATH:root}/js/jquery-2.1.4.min.js"></script>
+    <script src="${PATH:root}/js/jquery-ui.min.js"></script>
+    <script src="${PATH:root}/js/filter.js"></script>
   
 </head>

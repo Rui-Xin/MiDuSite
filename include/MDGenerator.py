@@ -59,6 +59,7 @@ class MDGenerator(object):
                 shutil.rmtree(dst)
         os.mkdir(dst)
 
+        # CSS
         if os.path.exists(self.mdvar._path['dst_prefix'] +
                           self.mdvar._path['root'] + '/css'):
                 shutil.rmtree(self.mdvar._path['dst_prefix'] +
@@ -67,6 +68,15 @@ class MDGenerator(object):
         shutil.copytree(self.mdvar._path['tmpl_prefix'] + '/css',
                         self.mdvar._path['dst_prefix'] +
                         self.mdvar._path['root'] + '/css')
+        # JS
+        if os.path.exists(self.mdvar._path['dst_prefix'] +
+                          self.mdvar._path['root'] + '/js'):
+                shutil.rmtree(self.mdvar._path['dst_prefix'] +
+                              self.mdvar._path['root'] +
+                              '/js')
+        shutil.copytree(self.mdvar._path['tmpl_prefix'] + '/js',
+                        self.mdvar._path['dst_prefix'] +
+                        self.mdvar._path['root'] + '/js')
 
         print self.generatePage(matchobj) + ' generated.'
 

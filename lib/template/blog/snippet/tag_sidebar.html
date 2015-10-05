@@ -2,18 +2,23 @@
 	<h1 class="brand-title"><a href="${PATH:root}/index.html">${GLOBAL:blogname}</a></h1>
 
 	<ul class="nav-list">
-		<li class="nav-item">
-		<a class="pure-button" href="">by TAG</a>
+		<li id="bytag" class="nav-item">
+		<a class="pure-button">by TAG</a>
 		</li>
-		<li class="nav-item">
-		<a class="pure-button" href="">by DATE</a>
+		<li id="byyear" class="nav-item">
+		<a class="pure-button">by YEAR</a>
 		</li>
 	</ul>
 	</br>
-	<div class="pure-menu pure-menu-scrollable custom-restricted">
+	<div id="tagbox" visibilityr="hidden" class="pure-menu pure-menu-scrollable custom-restricted">
 		<ul class="pure-menu-list">
 			${CALL:Selector[name:generateTag][arguments:posts,tag_page]}
 		</ul>
 	</div>
-	</nav>
+
+	<div id="yearbox" visibilityr="hidden" class="pure-menu pure-menu-scrollable custom-restricted">
+		<ul class="pure-menu-list">
+			${CALL:Selector[name:generateYear][arguments:posts,tag_page]}
+		</ul>
+	</div>
 </div>

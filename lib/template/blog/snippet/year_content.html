@@ -1,0 +1,4 @@
+<div>
+	${LIST:post_item[dst:posts][slices:5][filter:year:${CALL:Selector[name:get_cur_year]}]}
+	${CALL:Direct[name:page_direct][arguments:posts,5,year,${PATH:temp_cur_year}]}
+</div>

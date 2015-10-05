@@ -83,7 +83,7 @@ def od_next_entry_meta(dic, key):
         return None
 
     try:
-        new_index = dic.keys()[dic.keys().index(key) - 1]
+        new_index = dic.keys()[dic.keys().index(key) + 1]
     except IndexError:
         return None
 

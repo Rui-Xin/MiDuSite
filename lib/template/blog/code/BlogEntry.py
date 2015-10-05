@@ -1,5 +1,6 @@
 import time
 import MDEntry
+import datetime
 from BeautifulSoup import BeautifulSoup
 
 
@@ -13,6 +14,12 @@ class BlogEntry(MDEntry.MDEntry):
 
     def __init__(self, fname, mdvar):
         super(BlogEntry, self).__init__(fname, mdvar)
+        year = int(self.meta['date'][0:4])
+        cur_year = datetime.datetime.now().year
+        if year < cur_year - 4:
+            self.meta['year'] = 'BEFORE ' + str(cur_year - 5)
+        else:
+            self.meta['year'] = str(year)
         self.addHandler('mdlink', self.mdlink_handler)
 
     def mdlink_handler(self, matchobj):
