@@ -1,10 +1,11 @@
 import MiduHelper
 import MDConfig
 import MDEntry
-import sys
+import MDPageTemplates
+import MDSnippetTemplates
+import MDCallRef
 import copy
 import math
-import importlib
 import re
 import os
 import shutil
@@ -45,6 +46,21 @@ class MDGenerator(object):
         self.handlers = OrderedDict()
         for default_handler in self.DEFAULT_HANDLERS:
             self.addHandler(default_handler[0], default_handler[1])
+
+        self.loaded = {'page': MDPageTemplates.MDPageTemplates(None),
+                       'snippet': MDSnippetTemplates.MDSnippetTemplates(None),
+                       'code': MDCallRef.MDModuleRef(None)}
+        for item in self.loaded:
+            self.loaded[item].addFolder(self.mdvar._path['tmpl_prefix'] +
+                                        '/' + item)
+            src_folder = self.mdvar._path['src_prefix'] + '/' + item
+            if os.path.isdir(src_folder):
+                self.loaded[item].addFolder(src_folder)
+        if 'pre_process' in self.default:
+            to_process = self.default['pre_process'].split(',')
+            for call in to_process:
+                self.process_callsite(call, external=True)
+
         self.initialized = True
 
     def generate(self):
@@ -100,8 +116,6 @@ class MDGenerator(object):
         if 'suffix' in page_info['paras']:
             page_info['paras']['dst'] += page_info['paras']['suffix']
         self.mdvar.path_changepage(page_info['paras']['dst'])
-        fname = self.mdvar._path['tmpl_prefix'] + 'page/' + \
-            page_info['target'] + '.html'
         dst_name = self.mdvar._path['curdir'] + '/' +\
             self.mdvar._path['curpage'] + '.html'
 
@@ -112,9 +126,9 @@ class MDGenerator(object):
         MiduHelper.mkdir_p(self.mdvar._path['dst_prefix'] +
                            self.mdvar._path['curdir'])
 
-        with open(fname) as f, open(self.mdvar._path['dst_prefix'] +
-                                    dst_name, 'w') as f_w:
-            lines = f.read()
+        with open(self.mdvar._path['dst_prefix'] +
+                  dst_name, 'w') as f_w:
+            lines = self.loaded['page'].get(page_info['target'])
             self.page_cached[dst_name] = dst_name
             new_lines = self.replace(lines)
             f_w.write(new_lines)
@@ -127,12 +141,9 @@ class MDGenerator(object):
         return ''
 
     def generateSnippet(self, snippet):
-        fname = 'lib/template/' + self.default['template'] + \
-            '/snippet/' + snippet.group(1) + '.html'
-        with open(fname) as f:
-            lines = f.read()
-            return self.replace(lines)
-        return []
+        snippet_tmpl = snippet.group(1)
+        lines = self.loaded['snippet'].get(snippet_tmpl)
+        return self.replace(lines)
 
     def generateList(self, lst):
         listcall = MiduHelper.parseVar(lst.group(1))
@@ -268,18 +279,7 @@ class MDGenerator(object):
 
     def generateCall(self, _call):
         call = _call.group(1)
-        call_info = MiduHelper.parseVar(call)
-        file_info = os.path.split(call_info['target'])
-        fun_info = call_info['paras']
-
-        directory = os.path.relpath(self.mdvar._path['tmpl_prefix'] +
-                                    'code/' + file_info[0])
-        fname = file_info[1]
-        fun_name = fun_info['name']
-        para_list = [self]
-        if 'arguments' in fun_info:
-            para_list.extend(list(fun_info['arguments'].split(',')))
-        return MiduHelper.fun_call(directory, fname, fun_name, para_list)
+        return self.process_callsite(call)
 
     def generateGlobal(self, _global):
         varname = _global.group(1)
@@ -314,15 +314,34 @@ class MDGenerator(object):
                            count=0)
         return lines
 
+    def process_callsite(self, call_site, external=False):
+
+        call_info = MiduHelper.parseVar(call_site)
+        file_info = os.path.split(call_info['target'])
+        fun_info = call_info['paras']
+
+        fname = file_info[1]
+        fun_name = fun_info['name']
+
+        if not external:
+            para_list = [self]
+        else:
+            para_list = []
+
+        if 'arguments' in fun_info:
+            para_list.extend(list(fun_info['arguments'].split(',')))
+
+        target_module = self.loaded['code'].get(fname)
+        func = getattr(target_module, fun_name)
+        return func(*para_list)
+
     def get_MDEntry(self):
         if 'parser' in self.default:
             module = self.default['parser'].split('.')
         else:
             return MDEntry.MDEntry
 
-        sys.path.insert(0, 'lib/template/'
-                        + self.default['template'] + '/code')
-        mod = importlib.import_module(module[0])
+        mod = self.loaded['code'].get(module[0])
         klass = getattr(mod, module[1])
         if issubclass(klass, MDEntry.MDEntry):
             return klass

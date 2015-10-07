@@ -192,4 +192,5 @@ h3 {
 	border: None;
 	border-radius: 1px;
 	display: inline-block;
+	overflow: auto;
 }
