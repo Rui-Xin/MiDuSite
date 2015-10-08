@@ -1,5 +1,7 @@
 [default]
 parser=BlogEntry.BlogEntry
 startpage=index[dst:index]
+pre_process=BlogUtility[name:pre_process]
 [global]
 blogname=MiduBlog
+partitions=tag,year

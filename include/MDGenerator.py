@@ -56,10 +56,6 @@ class MDGenerator(object):
             src_folder = self.mdvar._path['src_prefix'] + '/' + item
             if os.path.isdir(src_folder):
                 self.loaded[item].addFolder(src_folder)
-        if 'pre_process' in self.default:
-            to_process = self.default['pre_process'].split(',')
-            for call in to_process:
-                self.process_callsite(call, external=True)
 
         self.initialized = True
 
@@ -93,6 +89,11 @@ class MDGenerator(object):
         shutil.copytree(self.mdvar._path['tmpl_prefix'] + '/js',
                         self.mdvar._path['dst_prefix'] +
                         self.mdvar._path['root'] + '/js')
+
+        if 'pre_process' in self.default:
+            to_process = self.default['pre_process'].split(',')
+            for call in to_process:
+                self.process_callsite(call)
 
         print self.generatePage(matchobj) + ' generated.'
 
@@ -231,7 +232,8 @@ class MDGenerator(object):
             to_filter = listcall['paras']['filter'].split(':')
             entries_filtered = OrderedDict()
             for entry in entries:
-                if entries[entry].meta[to_filter[0]] == to_filter[1]:
+                if to_filter[0] in entries[entry].meta and\
+                        entries[entry].meta[to_filter[0]] == to_filter[1]:
                     entries_filtered[entry] = entries[entry]
             return entries_filtered
         else:
