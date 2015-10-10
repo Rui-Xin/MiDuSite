@@ -219,9 +219,12 @@ class MDGenerator(object):
             to_filter = listcall['paras']['filter'].split(':')
             entries_filtered = OrderedDict()
             for entry in entries:
-                if to_filter[0] in entries[entry].meta and\
-                        entries[entry].meta[to_filter[0]] == to_filter[1]:
-                    entries_filtered[entry] = entries[entry]
+                if to_filter[0] in entries[entry].meta:
+                    if type(entries[entry].meta[to_filter[0]]) is list:
+                        if to_filter[1] in entries[entry].meta[to_filter[0]]:
+                            entries_filtered[entry] = entries[entry]
+                    elif entries[entry].meta[to_filter[0]] == to_filter[1]:
+                        entries_filtered[entry] = entries[entry]
             return entries_filtered
         else:
             return entries
@@ -283,6 +286,9 @@ class MDGenerator(object):
             return 'not found'
         varname = _local.group(1)
         if varname in self.mdvar._local:
+            if varname == 'tag' and \
+                    type(self.mdvar._local[varname]) is list:
+                return ', '.join(self.mdvar._local[varname])
             return self.mdvar._local[varname]
         else:
             return 'not found'

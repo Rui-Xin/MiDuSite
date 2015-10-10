@@ -50,10 +50,16 @@ class MDEntry(object):
                 val = [x.strip(' ').strip('"') for x in info[1:]]
                 self.meta[info[0].strip(' ')] = ':'.join(val).strip('\n')
 
+            if 'tag' in self.meta:
+                tags = self.meta['tag'].split(',')
+                if len(tags) > 1:
+                    self.meta['tag'] = tags
+
             self.meta['origin_content'] = ''.join(lines[l2+1:])
             self.meta['content'] = \
                 markdown.markdown(
-                    self.meta['origin_content'])
+                    self.meta['origin_content'],
+                estensions=['markdown.extensions.fenced_code'])
 
     def processContext(self):
         context = self.meta['content']

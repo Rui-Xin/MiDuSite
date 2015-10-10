@@ -1,5 +1,6 @@
 <head>
-    <meta charset="utf-8">
+import code
+	<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="The blog page">
 
@@ -28,5 +29,16 @@
     <script src="${PATH:root}/js/jquery-2.1.4.min.js"></script>
     <script src="${PATH:root}/js/jquery-ui.min.js"></script>
     <script src="${PATH:root}/js/filter.js"></script>
+
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/default.min.css">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <script>
+	$(document).ready(function() {
+	$('code').each(function(i, block) {
+		hljs.highlightBlock(block);
+		
+	});
+	});
+    </script>
   
 </head>

@@ -25,7 +25,7 @@ def generate_partition(generator, partition, dst, pagestyle):
     partition_list = []
     for entry in entries:
         if partition in entries[entry].meta:
-            partition_list.append(entries[entry].meta[partition])
+            merge(partition_list, entries[entry].meta[partition])
 
     partition_list = sorted(set(partition_list))
 
@@ -76,3 +76,9 @@ def get_cur_partition(generator, partition):
     generator.mdvar._path['temp_cur_' + partition] = cur_part
     return cur_part
 
+
+def merge(partition_list, item):
+    if type(item) is list:
+        return partition_list.extend(item)
+    else:
+        return partition_list.append(item)
