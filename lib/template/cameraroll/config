@@ -1,0 +1,8 @@
+[default]
+parser=ImageEntry.ImageEntry
+startpage=index[dst:index]
+pre_process=ImageUtility[name:pre_process],Thumbnail[name:generate] 
+mdsort=ImageUtility[name:sort_img]
+[global]
+camerarollname=MiduPictures
+partitions=country,year,device

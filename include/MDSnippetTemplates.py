@@ -28,4 +28,6 @@ class MDSnippetTemplates:
         self.templates[templatename] = content
 
     def get(self, tmpl):
+        if tmpl not in self.templates:
+            return ''
         return copy.deepcopy(self.templates[tmpl])

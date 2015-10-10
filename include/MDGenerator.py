@@ -9,6 +9,7 @@ import math
 import re
 import os
 import shutil
+from distutils import dir_util
 from collections import OrderedDict
 
 
@@ -72,23 +73,9 @@ class MDGenerator(object):
         os.mkdir(dst)
 
         # CSS
-        if os.path.exists(self.mdvar._path['dst_prefix'] +
-                          self.mdvar._path['root'] + '/css'):
-                shutil.rmtree(self.mdvar._path['dst_prefix'] +
-                              self.mdvar._path['root'] +
-                              '/css')
-        shutil.copytree(self.mdvar._path['tmpl_prefix'] + '/css',
-                        self.mdvar._path['dst_prefix'] +
-                        self.mdvar._path['root'] + '/css')
+        self.copy_directory('css')
         # JS
-        if os.path.exists(self.mdvar._path['dst_prefix'] +
-                          self.mdvar._path['root'] + '/js'):
-                shutil.rmtree(self.mdvar._path['dst_prefix'] +
-                              self.mdvar._path['root'] +
-                              '/js')
-        shutil.copytree(self.mdvar._path['tmpl_prefix'] + '/js',
-                        self.mdvar._path['dst_prefix'] +
-                        self.mdvar._path['root'] + '/js')
+        self.copy_directory('js')
 
         if 'pre_process' in self.default:
             to_process = self.default['pre_process'].split(',')
@@ -241,7 +228,11 @@ class MDGenerator(object):
 
     def find_entry(self, lst_dir):
         if lst_dir not in self.entry_cached:
-            files = filter(lambda x: x.endswith('.md'),
+            if 'md_suffix' in self.default:
+                md_suffix = '.' + self.default['md_suffix']
+            else:
+                md_suffix = '.md'
+            files = filter(lambda x: x.endswith(md_suffix),
                            os.listdir(lst_dir))
             MDEntry = self.get_MDEntry()
             entry_list = []
@@ -251,15 +242,12 @@ class MDGenerator(object):
                 entry_list.append(entry)
                 file_map[entry] = f
 
-            if 'mdsort' in self.mdvar._global:
-                sort_file = os.path.split(self.mdvar._global['mdsort'])
-                directory = self.mdvar._path['tmpl_prefix'] +\
-                    'code/' + sort_file[0]
-                fname = sort_file[1]
-                fun_name = 'sort'
-                arguments = [entry_list]
+            if 'mdsort' in self.default:
+                sort_fun = self.default['mdsort']
                 entry_list = \
-                    MiduHelper.fun_call(directory, fname, fun_name, arguments)
+                    self.process_callsite(sort_fun,
+                                          external=True,
+                                          args=[entry_list])
 
             entries = OrderedDict()
             file_num_map = {}
@@ -316,7 +304,7 @@ class MDGenerator(object):
                            count=0)
         return lines
 
-    def process_callsite(self, call_site, external=False):
+    def process_callsite(self, call_site, external=False, args=None):
 
         call_info = MiduHelper.parseVar(call_site)
         file_info = os.path.split(call_info['target'])
@@ -332,6 +320,8 @@ class MDGenerator(object):
 
         if 'arguments' in fun_info:
             para_list.extend(list(fun_info['arguments'].split(',')))
+        elif args is not None:
+            para_list.extend(args)
 
         target_module = self.loaded['code'].get(fname)
         func = getattr(target_module, fun_name)
@@ -349,3 +339,24 @@ class MDGenerator(object):
             return klass
         else:
             return MDEntry.MDEntry
+
+    def copy_directory(self, target):
+        if os.path.exists(self.mdvar._path['dst_prefix'] +
+                          self.mdvar._path['root'] + '/' +
+                          target):
+            shutil.rmtree(self.mdvar._path['dst_prefix'] +
+                          self.mdvar._path['root'] + '/' +
+                          target)
+        os.mkdir(self.mdvar._path['dst_prefix'] +
+                 self.mdvar._path['root'] + '/' +
+                 target)
+
+        targs = [self.mdvar._path['tmpl_prefix'] + target,
+                 self.mdvar._path['src_prefix'] + target]
+        dst = self.mdvar._path['dst_prefix'] +\
+            self.mdvar._path['root'] +\
+            '/' + target
+        for folder in targs:
+            if folder in targs:
+                if os.path.exists(folder):
+                    dir_util.copy_tree(folder, dst)

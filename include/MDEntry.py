@@ -34,10 +34,11 @@ class MDEntry(object):
             l = 0
 
             try:
-                while '```MiDuSite\n' not in lines[l]:
+                while '```MiDuSite' not in lines[l]:
                     l += 1
                 l1 = l
-                while '```\n' not in lines[l]:
+                l += 1
+                while '```' not in lines[l]:
                     l += 1
                 l2 = l
             except IndexError:
