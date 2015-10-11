@@ -4,6 +4,7 @@ import MDEntry
 import MDPageTemplates
 import MDSnippetTemplates
 import MDCallRef
+import MDSite
 import copy
 import math
 import re
@@ -22,7 +23,8 @@ class MDGenerator(object):
                         ('LIST', 'generateList'),
                         ('LISTINFO', 'generateListinfo'),
                         ('SNIPPET', 'generateSnippet'),
-                        ('PAGE', 'generatePage')]
+                        ('PAGE', 'generatePage'),
+                        ('Site', 'generateSite')]
 
     def __init__(self, mdconfig):
         if not isinstance(mdconfig, MDConfig.MDConfig):
@@ -43,6 +45,7 @@ class MDGenerator(object):
         self.mdvar.update_path(pathlst)
 
         self.page_cached = {}
+        self.site_cached = {}
         self.entry_cached = {}
         self.handlers = OrderedDict()
         for default_handler in self.DEFAULT_HANDLERS:
@@ -89,6 +92,13 @@ class MDGenerator(object):
     def addHandler(self, syntax, handler):
         if syntax not in self.handlers:
             self.handlers.update([(syntax, getattr(self, handler))])
+
+    def generateSite(self, site):
+        site_info = MiduHelper.parseVar(site.group(1))['target']
+        if site_info not in self.site_cached:
+            mdsite = MDSite.MDSite(site_info)
+            self.site_cached[site_info] = mdsite.generate()
+        return self.site_cached[site_info]
 
     def generatePage(self, page):
         page_info = MiduHelper.parseVar(page.group(1))

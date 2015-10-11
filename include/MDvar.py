@@ -20,7 +20,7 @@ class MDvar:
                         'subpage_list': []
                         }
 
-    def __init__(self, _local=DEFAULT_LOCAL, _global={}):
+    def __init__(self, _local=copy.deepcopy(DEFAULT_LOCAL), _global={}):
         self._local = _local
         self._global = _global
         self._path = {'root': os.path.relpath(os.path.curdir),
@@ -29,7 +29,7 @@ class MDvar:
                       'from_page': '',
                       'pg_tmpl': '',
                       'pg_para': ''}
-        self._listinfo = self.DEFAULT_LISTINFO
+        self._listinfo = copy.deepcopy(self.DEFAULT_LISTINFO)
 
     def update_global(self, _global):
         if isinstance(_global, dict):

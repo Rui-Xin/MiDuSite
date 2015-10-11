@@ -1,0 +1,7 @@
+[default]
+startpage=index[dst:index]
+pre_process=SectionProcessor[name:copy_files]
+[global]
+sitename=Midu
+partitions=tag,year
+logo=logo.jpg
