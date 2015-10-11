@@ -1,4 +1,4 @@
-import markdown
+import markdown2
 import re
 import os
 import shutil
@@ -57,9 +57,9 @@ class MDEntry(object):
 
             self.meta['origin_content'] = ''.join(lines[l2+1:])
             self.meta['content'] = \
-                markdown.markdown(
+                markdown2.markdown(
                     self.meta['origin_content'],
-                estensions=['markdown.extensions.fenced_code'])
+                    extras=['fenced-code-blocks']).replace('\\#', '#')
 
     def processContext(self):
         context = self.meta['content']

@@ -90,6 +90,7 @@ def filter_entries(entries, _filter, _value):
     else:
         filtered_entries = OrderedDict()
         for entry in entries:
-            if entries[entry].meta[_filter] == _value:
+            if _filter in entries[entry].meta and\
+                    entries[entry].meta[_filter] == _value:
                 filtered_entries[entry] = entries[entry]
     return filtered_entries

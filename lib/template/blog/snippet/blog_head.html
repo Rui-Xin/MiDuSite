@@ -29,4 +29,14 @@
     <script src="${PATH:root}/js/jquery-ui.min.js"></script>
     <script src="${PATH:root}/js/filter.js"></script>
   
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/default.min.css">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <script>
+	$(document).ready(function() {
+	$('pre code').each(function(i, block) {
+		hljs.highlightBlock(block);
+		
+	});
+	});
+    </script>
 </head>

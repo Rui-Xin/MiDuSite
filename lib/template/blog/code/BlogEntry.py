@@ -29,7 +29,7 @@ class BlogEntry(MDEntry.MDEntry):
 
     def post_process(self):
         reduc_content = BeautifulSoup(self.meta['content'])
-        for tag in ['embed', 'img', 'a']:
+        for tag in ['embed', 'img', 'a', 'pre']:
             for match in reduc_content.findAll(tag):
                 match.replaceWithChildren()
 
