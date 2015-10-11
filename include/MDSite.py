@@ -25,3 +25,6 @@ class MDSite:
 
         else:
             self.generator = MDGenerator.MDGenerator(mdconfig)
+
+    def generate(self):
+        self.generator.generate()

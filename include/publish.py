@@ -10,7 +10,7 @@ sys.path.insert(0, 'include')
 
 def publish(section):
     site = MDSite.MDSite(section)
-    site.generator.generate()
+    site.generate()
 
 
 if __name__ == "__main__":

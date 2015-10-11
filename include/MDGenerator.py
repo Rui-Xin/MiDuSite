@@ -82,7 +82,9 @@ class MDGenerator(object):
             for call in to_process:
                 self.process_callsite(call)
 
-        print self.generatePage(matchobj) + ' generated.'
+        page = self.generatePage(matchobj)
+        print page + ' generated.'
+        return page
 
     def addHandler(self, syntax, handler):
         if syntax not in self.handlers:

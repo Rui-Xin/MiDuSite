@@ -1,6 +1,7 @@
 import os
 import re
 import glob
+import copy
 import shutil
 import MiduHelper
 import MDEntry
@@ -15,11 +16,26 @@ def copy_files(generator):
             shutil.copy2(f, dst_f)
 
 
+SIDEBAR='''
+<div class="header">
+	<h1 class="brand-title"><a href="${PATH:root}/index.html">${GLOBAL:aboutmename}</a></h1>
+
+	<ul class="nav-list">
+    to_be_replace
+	</ul>
+	</br>
+
+</div>
+
+'''
+
 def generate_sidebar(generator):
     if 'pages' not in generator.mdvar._global:
         return
 
     pages = generator.mdvar._global['pages'].split(',')
+    page_cached = {}
+    entries = {}
     for page in pages:
         call = MiduHelper.parseVar(page)
 
@@ -27,13 +43,54 @@ def generate_sidebar(generator):
                                generator.mdvar._path['src_prefix'] +
                                call['paras']['src'],
                                call['target'])
+        entries[page] = entry
 
+        generator.mdvar._listinfo['in_list'] = True
+        local_bk = generator.mdvar.local_backup()
+        entry.processContext()
+        generator.mdvar.update_local(entry.get_mdlocal())
+
+        page_cached[call['paras']['dst']] = entry.meta['title']
+        generator.mdvar.local_restore(local_bk)
+
+    page_cached_all = copy.deepcopy(page_cached)
+    page_cached_all['home'] = None
+
+    for cur in page_cached_all:
+        lines = []
+        for dst in page_cached:
+            if cur == dst:
+                lines.append('<li class="nav-item">' +
+                             '<a class="pure-button ' +
+                             ' pure-button-disabled">' +
+                             page_cached[dst] +
+                             '</a></li>')
+            else:
+                lines.append('<li class="nav-item">' +
+                             '<a class="pure-button" ' +
+                             'href="' +
+                             dst + '.html' +
+                             '">' +
+                             page_cached[dst] +
+                             '</a></li>')
+
+        if cur is 'home':
+            generator.loaded['snippet'].templates['sidebar'] =\
+                SIDEBAR.replace('to_be_replace','\n'.join(lines))
+        else:
+            generator.loaded['snippet'].templates[cur + '_sidebar'] =\
+                SIDEBAR.replace('to_be_replace','\n'.join(lines))
+
+    for page in pages:
+        call = MiduHelper.parseVar(page)
+
+        entry = entries[page]
+        generator.mdvar._listinfo['in_list'] = True
         local_bk = generator.mdvar.local_backup()
         entry.processContext()
         generator.mdvar.update_local(entry.get_mdlocal())
 
         generator.generatePage(re.match('(.*)', page))
-
         generator.mdvar.local_restore(local_bk)
 
 
