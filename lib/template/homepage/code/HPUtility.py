@@ -3,30 +3,26 @@ import re
 import sys
 import shutil
 
-NAV='''
-<div class="custom-menu-wrapper">
-    <div class="pure-menu custom-menu custom-menu-top">
-        <a href="#" class="pure-menu-heading custom-menu-brand">Brand</a>
-        <a href="#" class="custom-menu-toggle" id="toggle"><s class="bar"></s><s class="bar"></s></a>
-    </div>
-    <div class="pure-menu pure-menu-horizontal pure-menu-scrollable custom-menu custom-menu-bottom custom-menu-tucked" id="tuckedMenu">
-        <div class="custom-menu-screen"></div>
-        <ul class="pure-menu-list">
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Home</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">About</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Contact</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Blog</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">GitHub</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Twitter</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Apple</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Google</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Wang</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Yahoo</a></li>
-            <li class="pure-menu-item"><a href="#" class="pure-menu-link">W3C</a></li>
-        </ul>
-    </div>
-</div>
+NAV = '''
+<ul class="nav navbar-nav">
+<li>
+<a href="../getting-started/">Getting started</a>
+</li>
+<li>
+<a href="../css/">CSS</a>
+</li>
+<li>
+<a href="../components/">Components</a>
+</li>
+<li>
+<a href="../javascript/">JavaScript</a>
+</li>
+<li>
+<a href="../customize/">Customize</a>
+</li>
+</ul>
 '''
+
 
 def sites(generator):
     lines = []
@@ -39,7 +35,7 @@ def sites(generator):
 
         if os.path.exists('published/' + dst):
             shutil.rmtree('published/' + dst)
-        os.mkdir('published/' + dst)
+            os.mkdir('published/' + dst)
 
         matchboj = re.match('(.*)', dst)
 

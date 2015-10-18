@@ -16,20 +16,19 @@ def copy_files(generator):
             shutil.copy2(f, dst_f)
 
 
-SIDEBAR='''
-<div class="header">
-	<h1 class="brand-title"><a href="${PATH:root}/index.html">${GLOBAL:aboutmename}</a></h1>
-
-	<ul class="nav-list">
-    to_be_replace
-	</ul>
-	</br>
-
+COVER='''
+<div class="container">
+        <h1><a class="" href="${PATH:root}/index.html">${GLOBAL:aboutmename}</a></h1>
+        <p>${GLOBAL:desc}</p>
 </div>
-
+<div class="subnav container">
+<ul>
+        to_be_replace
+</ul>
+</div>
 '''
 
-def generate_sidebar(generator):
+def generate_cover(generator):
     if 'pages' not in generator.mdvar._global:
         return
 
@@ -75,11 +74,11 @@ def generate_sidebar(generator):
                              '</a></li>')
 
         if cur is 'home':
-            generator.loaded['snippet'].templates['sidebar'] =\
-                SIDEBAR.replace('to_be_replace','\n'.join(lines))
+            generator.loaded['snippet'].templates['cover'] =\
+                COVER.replace('to_be_replace','\n'.join(lines))
         else:
-            generator.loaded['snippet'].templates[cur + '_sidebar'] =\
-                SIDEBAR.replace('to_be_replace','\n'.join(lines))
+            generator.loaded['snippet'].templates[cur + '_cover'] =\
+                COVER.replace('to_be_replace','\n'.join(lines))
 
     for page in pages:
         call = MiduHelper.parseVar(page)

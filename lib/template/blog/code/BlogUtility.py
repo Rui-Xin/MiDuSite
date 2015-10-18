@@ -68,8 +68,6 @@ COVER = '''
         to_replace
 </ul>
 </div>
-
-</div>
 '''
 LI = '''
 <li class="dropdown mdnav"><a href="#" class="dropdown-toggle" data-toggle="dropdown">

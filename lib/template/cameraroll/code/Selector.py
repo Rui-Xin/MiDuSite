@@ -6,17 +6,16 @@ def generate_partition(generator, partition, dst, pagestyle):
     lines = []
     homepage = \
         os.path.relpath(generator.mdvar.path_getroot() + '/' + 'index.html')
-    if pagestyle == 'homepage':
-        lines.append('<li class="pure-menu-item"><a href="' +
+    if pagestyle == 'home_page':
+        lines.append('<li class=subnav-selected><a href="' +
                      homepage +
-                     '" class="pure-menu-link pure-menu-selected"' +
-                     ' style="color:rgb(118, 150, 172)">' +
+                     '">' +
                      'All</a></li>')
     else:
-        lines.append('<li class="pure-menu-item">' +
+        lines.append('<li>' +
                      '<a href="' +
                      homepage +
-                     '" class="pure-menu-link"">All</a></li>')
+                     '">All</a></li>')
 
     lst_dir = generator.mdvar._path['src_prefix'] + dst
     generator.find_entry(lst_dir)
@@ -54,17 +53,16 @@ def generate_partition(generator, partition, dst, pagestyle):
 
         if pagestyle == partition + '_page' and \
                 part == get_cur_partition(generator, partition):
-            lines.append('<li class="pure-menu-item pure-menu-selected">' +
+            lines.append('<li class="subnav-selected">' +
                          '<a href="' +
                          link +
-                         '" class="pure-menu-link"' +
-                         ' style="color:rgb(118, 150, 172)">' +
+                         '">' +
                          part +
                          '</a></li>')
         else:
-            lines.append('<li class="pure-menu-item"><a href="' +
+            lines.append('<li><a href="' +
                          link +
-                         '" class="pure-menu-link">' +
+                         '">' +
                          part +
                          '</a></li>')
 

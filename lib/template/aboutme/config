@@ -1,6 +1,6 @@
 [default]
 cvparser=CVEntry.CVEntry
 startpage=index[dst:index]
-pre_process=AboutUtility[name:copy_files],AboutUtility[name:generate_sidebar]
+pre_process=AboutUtility[name:copy_files],AboutUtility[name:generate_cover]
 [global]
 aboutmename=About Me
