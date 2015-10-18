@@ -4,9 +4,7 @@ from collections import OrderedDict
 
 
 def page_direct(generator, dst, slices, _filter, _value):
-    lines = ['<div class="footer">',
-             '<div class="pure-menu">',
-             '<ul class="pure-menu-list">']
+    lines = ['<div class="footer">']
 
     lst_dir = generator.mdvar._path['src_prefix'] + dst
     generator.find_entry(lst_dir)
@@ -32,10 +30,10 @@ def page_direct(generator, dst, slices, _filter, _value):
         if page_num > 2:
             pagename += '_' + str(page_num - 1)
 
-        prv_line = '<li class="pure-menu-item"><a href="' +\
+        prv_line = '<div class="leftfooter"><a href="' +\
             pagename +\
             '.html"> Previous Page' +\
-            '</a></li>'
+            '</a></div>'
         lines.append(prv_line)
 
     pagename = generator.mdvar._path['curpage']
@@ -45,42 +43,40 @@ def page_direct(generator, dst, slices, _filter, _value):
 
         pagename += '_' + str(page_num + 1)
 
-        nxt_line = '<li class="pure-menu-item"><a href="' +\
+        nxt_line = '<div class="rightfooter"><a href="' +\
             pagename +\
             '.html"> Next Page' +\
-            '</a></li>'
+            '</a></div>'
         lines.append(nxt_line)
 
-    lines.extend(['</ul>', '</div>', '</div>'])
+    lines.extend(['</div>'])
     return '\n'.join(lines)
 
 
 def blog_direct(generator):
-    lines = ['<div class="footer">',
-             '<div class="pure-menu">',
-             '<ul class="pure-menu-list">']
+    lines = ['<div class="footer">']
 
     if not generator.mdvar._listinfo['prev_entry'] is None:
         prv_title = generator.mdvar._listinfo['prev_entry']['title']
         num = generator.mdvar._listinfo['num']
-        prv_line = '<li class="pure-menu-item"><a href="blog' +\
+        prv_line = '<div class="leftfooter"><a href="blog' +\
             str(int(num)-1) +\
             '.html"> Previous:' +\
             prv_title + \
-            '</a></li>'
+            '</a></div>'
         lines.append(prv_line)
 
     if not generator.mdvar._listinfo['next_entry'] is None:
         nxt_title = generator.mdvar._listinfo['next_entry']['title']
         num = generator.mdvar._listinfo['num']
-        nxt_line = '<li class="pure-menu-item"><a href="blog' +\
+        nxt_line = '<div class="rightfooter"><a href="blog' +\
             str(int(num)+1) +\
             '.html"> Next:' +\
             nxt_title + \
-            '</a></li>'
+            '</a></div>'
         lines.append(nxt_line)
 
-    lines.extend(['</ul>', '</div>', '</div>'])
+    lines.extend(['</div>'])
     return '\n'.join(lines)
 
 

@@ -4,7 +4,7 @@ import MiduHelper
 
 
 class MDSite:
-    def __init__(self, section):
+    def __init__(self, section, nav=None):
         mdconfig_src = MDConfig.MDConfig('source/' + section)
         try:
             template = mdconfig_src._default['template']
@@ -14,6 +14,8 @@ class MDSite:
         mdconfig_template = MDConfig.MDConfig('lib/template/' + template)
         mdconfig = mdconfig_template.merge(mdconfig_src)
         mdconfig.addSection(section)
+        if nav is not None:
+            mdconfig.addNav(nav)
 
         if 'generator' in mdconfig._global:
             generator_name = mdconfig._global['generator']

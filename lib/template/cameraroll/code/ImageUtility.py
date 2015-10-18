@@ -33,6 +33,7 @@ def generate_page(generator, partition):
 BODY = '''
 <body>
 <div id="layout" class="pure-g">
+	${SNIPPET:navigator}
     <div class="sidebar pure-u-1 pure-u-md-1-4">
 	    ${SNIPPET:partition_sidebar}
     </div>

@@ -36,3 +36,6 @@ class MDConfig:
 
     def addSection(self, section):
         self._default['section'] = section
+
+    def addNav(self, nav):
+        self._default['nav'] = nav

@@ -98,7 +98,7 @@ def get_page_Entry(generator, target, temp):
     if not target.endswith('.md'):
         target += '.md'
 
-    parser_name = temp + 'parset'
+    parser_name = temp + 'parser'
     if parser_name in generator.default:
         module = generator.default[parser_name].split('.')
     else:
@@ -107,6 +107,6 @@ def get_page_Entry(generator, target, temp):
     mod = generator.loaded['code'].get(module[0])
     klass = getattr(mod, module[1])
     if issubclass(klass, MDEntry.MDEntry):
-        return klass(target)
+        return klass(target, generator.mdvar)
     else:
         return MDEntry.MDEntry(target, generator.mdvar)

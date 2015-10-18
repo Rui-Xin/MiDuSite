@@ -1,3 +1,6 @@
+import copy
+
+
 def pre_process(generator):
     if 'partitions' not in generator.mdvar._global:
         return
@@ -29,12 +32,13 @@ def generate_page(generator, partition):
 
 BODY = '''
 <body>
-<div id="layout" class="pure-g">
-    <div class="sidebar pure-u-1 pure-u-md-1-4">
-	    ${SNIPPET:partition_sidebar}
+<div id="layout">
+	${SNIPPET:navigator}
+    <div class="cover">
+	    ${SNIPPET:partition_cover}
     </div>
 
-    <div class="content pure-u-1 pure-u-md-3-4">
+    <div class="content">
 	    ${SNIPPET:partition_content}
     </div>
 </div>
@@ -45,7 +49,7 @@ def generate_body(generator, partition):
 
 
 CONTENT = '''
-<div>
+<div class="container">
 ${LIST:post_item[dst:posts][slices:5][filter:R_partition:${CALL:Selector[name:get_cur_partition][arguments:R_partition]}]}
 ${CALL:Direct[name:page_direct][arguments:posts,5,R_partition,${PATH:temp_cur_R_partition}]}
 </div>
@@ -54,57 +58,50 @@ def generate_content(generator, partition):
     generator.loaded['snippet'].setContent(partition + '_content', CONTENT.replace('R_partition', partition))
 
 
-SIDEBAR = '''
-<div class="header">
-	<h1 class="brand-title"><a href="${PATH:root}/index.html">${GLOBAL:blogname}</a></h1>
+COVER = '''
+<div class="container">
+        <h1><a class="" href="${PATH:root}/index.html">${GLOBAL:blogname}</a></h1>
+        <p>${GLOBAL:desc}</p>
+</div>
+<div class="subnav container">
+<ul>
+        to_replace
+</ul>
+</div>
 
-	<ul class="nav-list">
-    ul_to_replace
-	</ul>
-	</br>
-
-    box_to_replace
 </div>
 '''
 LI = '''
-<li id="bypartition" class="nav-item">
-<a class="pure-button">by cap_partition</a>
+<li class="dropdown mdnav"><a href="#" class="dropdown-toggle" data-toggle="dropdown">
+by partition
+<span class="caret"></span></a>
+ul_to_replace
 </li>
 '''
-BOX = '''
-<div id="r_partitionbox" style="display:none" class="pure-menu pure-menu-scrollable custom-restricted">
-<ul class="pure-menu-list">
+UL = '''
+<ul class="dropdown-menu" role="menu">
 ${CALL:Selector[name:generate_partition][arguments:r_partition,posts,r_cur_partition_page]}
 </ul>
-</div>
 '''
-BOX_V = '''
-<div id="r_partitionbox" class="pure-menu pure-menu-scrollable custom-restricted">
-<ul class="pure-menu-list">
-${CALL:Selector[name:generate_partition][arguments:r_partition,posts,r_cur_partition_page]}
-</ul>
-</div>
-'''
+
 def generate_sidebar(generator, cur_partition, partitions):
-    sidebar = SIDEBAR
+    cover = copy.deepcopy(COVER)
 
     li_lines = []
-    box_lines = []
     for part in partitions:
-        li_lines.append(LI.replace('cap_partition', part.upper()).replace('partition', part))
-        if cur_partition == part:
-            box_lines.append(BOX_V.replace('r_cur_partition_page', cur_partition + '_page').replace('r_partition', part))
-        else:
-            box_lines.append(BOX.replace('r_cur_partition_page', cur_partition + '_page').replace('r_partition', part))
-    sidebar = sidebar.replace('ul_to_replace', '\n'.join(li_lines))
-    sidebar = sidebar.replace('box_to_replace', '\n'.join(box_lines))
+        ul_lines = []
+        ul_lines.append(UL.replace('r_cur_partition_page', cur_partition + '_page').replace('r_partition', part))
+        to_append = LI.replace('partition', part.upper()).replace('ul_to_replace', '\n'.join(ul_lines))
+        li_lines.append(to_append)
+
+    cover = cover.replace('to_replace', '\n'.join(li_lines))
 
     if cur_partition == 'home':
-        generator.loaded['snippet'].setContent('sidebar', sidebar)
+        generator.loaded['snippet'].setContent('cover', cover)
     elif cur_partition == 'blog':
-        generator.loaded['snippet'].setContent('blog_sidebar', sidebar)
+        generator.loaded['snippet'].setContent('blog_cover', cover)
     else:
-        generator.loaded['snippet'].setContent(cur_partition + '_sidebar', sidebar)
+        generator.loaded['snippet'].setContent(cur_partition + '_cover', cover)
 
 JS_FRAMEWORK_BEGIN = '$(document).ready(function(){'
 JS_FRAMEWORK_END= '})'

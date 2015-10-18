@@ -61,6 +61,9 @@ class MDGenerator(object):
             if os.path.isdir(src_folder):
                 self.loaded[item].addFolder(src_folder)
 
+        if 'nav' in self.default:
+            self.loaded['snippet'].setContent('navigator', self.default['nav'])
+
         self.initialized = True
 
     def generate(self):
@@ -93,10 +96,15 @@ class MDGenerator(object):
         if syntax not in self.handlers:
             self.handlers.update([(syntax, getattr(self, handler))])
 
-    def generateSite(self, site):
-        site_info = MiduHelper.parseVar(site.group(1))['target']
+    def generateSite(self, site, nav=None):
+        site_call = MiduHelper.parseVar(site.group(1))
+        site_info = site_call['target']
+
         if site_info not in self.site_cached:
-            mdsite = MDSite.MDSite(site_info)
+            if nav is None:
+                mdsite = MDSite.MDSite(site_info)
+            else:
+                mdsite = MDSite.MDSite(site_info, nav)
             self.site_cached[site_info] = mdsite.generate()
         return self.site_cached[site_info]
 
