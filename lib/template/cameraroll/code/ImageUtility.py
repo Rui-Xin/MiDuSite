@@ -54,9 +54,9 @@ def generate_body(generator, partition):
 CONTENT = '''
 <div class="container">
 	<div id="thumbs">
-${LIST:img_item[dst:info][slices:20][filter:R_partition:${CALL:Selector[name:get_cur_partition][arguments:R_partition]}]}
+${LIST:img_item[dst:info][slices:20][filter:R_partition:${CALL:ImageSelector[name:get_cur_partition][arguments:R_partition]}]}
 </div>
-${CALL:Direct[name:page_direct][arguments:info,20,R_partition,${PATH:temp_cur_R_partition}]}
+${CALL:ImageDirect[name:page_direct][arguments:info,20,R_partition,${PATH:temp_cur_R_partition}]}
 
 	<script src="${PATH:root}/js/lightbox.js"></script>
 </div>
@@ -85,7 +85,7 @@ ul_to_replace
 '''
 UL = '''
 <ul class="dropdown-menu" role="menu">
-${CALL:Selector[name:generate_partition][arguments:r_partition,info,r_cur_partition_page]}
+${CALL:ImageSelector[name:generate_partition][arguments:r_partition,info,r_cur_partition_page]}
 </ul>
 '''
 

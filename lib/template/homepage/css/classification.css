@@ -186,6 +186,12 @@
 
 .post-description img {
 	width: 45%;
+	line-height: 15;
+	margin-top: 1em;
+}
+
+#thumbs img {
+	width: 45%;
 }
 
 @media screen and (min-width: 768px) {
@@ -201,6 +207,11 @@
 
 	.post-description img {
 		width:auto;
+		margin-top: 1em;
+		line-height: 15;
 	}
 
+	#thumbs description img {
+		width:auto;
+	}
 }

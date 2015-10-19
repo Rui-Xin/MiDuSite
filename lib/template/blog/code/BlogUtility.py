@@ -50,8 +50,8 @@ def generate_body(generator, partition):
 
 CONTENT = '''
 <div class="container">
-${LIST:post_item[dst:posts][slices:5][filter:R_partition:${CALL:Selector[name:get_cur_partition][arguments:R_partition]}]}
-${CALL:Direct[name:page_direct][arguments:posts,5,R_partition,${PATH:temp_cur_R_partition}]}
+${LIST:post_item[dst:posts][slices:5][filter:R_partition:${CALL:BlogSelector[name:get_cur_partition][arguments:R_partition]}]}
+${CALL:BlogDirect[name:page_direct][arguments:posts,5,R_partition,${PATH:temp_cur_R_partition}]}
 </div>
 '''
 def generate_content(generator, partition):
@@ -78,7 +78,7 @@ ul_to_replace
 '''
 UL = '''
 <ul class="dropdown-menu" role="menu">
-${CALL:Selector[name:generate_partition][arguments:r_partition,posts,r_cur_partition_page]}
+${CALL:BlogSelector[name:generate_partition][arguments:r_partition,posts,r_cur_partition_page]}
 </ul>
 '''
 

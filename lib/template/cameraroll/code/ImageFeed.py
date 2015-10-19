@@ -25,9 +25,8 @@ def get_feed(generator):
                 tmp_dict[timestamp] = []
             tmp_dict[timestamp].append(entry)
 
-            meta = {}
-
         for timestamp in tmp_dict:
+            meta = {}
             entry_list = tmp_dict[timestamp]
 
             meta['action'] = "New photos in " + generator.default['section']
@@ -35,8 +34,8 @@ def get_feed(generator):
             places = []
             for entry in entry_list:
                 places.append(entry.meta['place'])
-            places = set(places)
-            meta['title'] = ', '.join(places[:3]) + 'and so on'
+            places = list(set(places))
+            meta['title'] = ', '.join(places[:3]) + ' and so on'
             meta['section'] = generator.default['section']
             desc = []
             for entry in entry_list[:4]:
@@ -45,7 +44,7 @@ def get_feed(generator):
                 img_item = img_item.replace('__img__', entry.meta['img'])
                 img_item = img_item.replace('__place__', entry.meta['place'])
                 desc.append(img_item)
-            meta['description'] = desc
+            meta['description'] = '\n'.join(desc)
             meta['link'] = '${PREFIX}index.html'
             res.append((timestamp, meta))
     return res

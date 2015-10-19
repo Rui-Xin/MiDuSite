@@ -17,15 +17,18 @@ class MDModuleRef:
             self.addModule(folder + '/' + f)
 
     def addModule(self, f):
-        folder = os.path.split(f)[0]
+        folder = os.path.abspath(os.path.split(f)[0])
         fname = os.path.split(f)[1]
         module_name = fname.replace('.py', '')
 
-        if sys.path[0] is not folder:
-            if folder in sys.path:
-                sys.path.remove(folder)
+        remove_path = True
+        if folder in sys.path:
+            remove_path = False
+        else:
             sys.path.insert(0, folder)
-        target_module = importlib.import_module(module_name)
+        target_module = importlib.import_module(module_name, folder)
+        if remove_path:
+            sys.path.remove(folder)
 
         self.addRef(module_name, target_module)
 

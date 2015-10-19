@@ -23,9 +23,9 @@ if __name__ == "__main__":
         print 'Section ' + section + ' doesn\'t exist!'
         sys.exit(1)
 
-    if section is not './' or \
-            section is not '' or \
-            section is not '.':
+    if not section == './' and \
+            not section == '' and \
+            not section == '.':
         if os.path.exists('published/' + section):
             shutil.rmtree('published/' + section)
         os.mkdir('published/' + section)

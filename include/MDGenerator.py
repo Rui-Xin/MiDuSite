@@ -74,9 +74,15 @@ class MDGenerator(object):
 
         dst = os.path.relpath(self.mdvar._path['dst_prefix'] +
                               self.mdvar._path['root'])
+
         if os.path.exists(dst):
-                shutil.rmtree(dst)
-        os.mkdir(dst)
+            for f in filter(lambda x: 'gitignore' not in x, os.listdir(dst)):
+                if not os.path.isdir(dst + '/' + f):
+                    os.remove(dst + '/' + f)
+                else:
+                    shutil.rmtree(dst + '/' + f)
+        else:
+            os.mkdir(dst)
 
         # CSS
         self.copy_directory('css')
@@ -105,7 +111,8 @@ class MDGenerator(object):
                 mdsite = MDSite.MDSite(site_info)
             else:
                 mdsite = MDSite.MDSite(site_info, nav)
-            self.site_cached[site_info] = mdsite.generate()
+            self.site_cached[site_info] = mdsite
+            mdsite.generate()
         return self.site_cached[site_info]
 
     def generatePage(self, page):
@@ -386,3 +393,9 @@ class MDGenerator(object):
             if folder in targs:
                 if os.path.exists(folder):
                     dir_util.copy_tree(folder, dst)
+
+    def get_feed(self):
+        if 'feed' in self.default:
+            return self.process_callsite(self.default['feed'])
+        else:
+            return []
