@@ -63,21 +63,19 @@
 }
 
 .readmore{
-	font-size: 60%;
+	font-size: 1em;
 	text-transform: uppercase;
 	font-weight: 300;
 }
 
-.post-description {
+.post-description, .post-content  {
 	font-weight: 300;
+	font-size: 1.1em;
+	line-height: 2;
 }
 
 .post-description h2{
 	font-size: 1.5em;
-	font-weight: 300;
-}
-
-.post-content {
 	font-weight: 300;
 }
 
@@ -114,6 +112,7 @@
 
 .mdnav {
 	display: inline;
+	border: none;
 }
 
 .dropdown-menu {

@@ -1,10 +1,12 @@
 import MDEntry
+import markdown2
 from pybtex.database.input import bibtex
 
 
 class CVEntry(MDEntry.MDEntry):
     def __init__(self, fname, mdvar):
         super(CVEntry, self).__init__(fname, mdvar)
+        self.meta['description'] = markdown2.markdown(self.meta['description'])
         self.addHandler('bib', self.bib_handler)
 
     def bib_handler(self, matchobj):
@@ -16,6 +18,8 @@ class CVEntry(MDEntry.MDEntry):
         bib_sorted = sorted(bib_data.entries.items(), cmp=sort_by_year)
 
         lines = []
+
+        lines.append('<ul>')
         for key, value in bib_sorted:
             line = []
             authors = value.fields['author'].split('and')
@@ -29,13 +33,17 @@ class CVEntry(MDEntry.MDEntry):
                 ref_authors.append(ref_name)
             if len(ref_authors) > 1:
                 ref_authors[-1] = 'and ' + ref_authors[-1]
+
+            line.append('<li>')
             line.append(', '.join(ref_authors))
             line.append('"' + value.fields['title'] + '"')
             line.append('In <em>' + value.fields['booktitle'] + '</em>,')
             line.append('pp. ' + value.fields['pages'] + '.')
             line.append(value.fields['organization'] + ',')
             line.append(value.fields['year'] + '.')
+            line.append('</li>')
             lines.append(' '.join(line))
+        lines.append('</ul>')
         return '\n'.join(lines)
 
 

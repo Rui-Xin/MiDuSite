@@ -4,7 +4,7 @@ import datetime
 
 
 IMG_ITEM = '''
-<a class="example-image-link" href="${PREFIX}images/__img__" data-lightbox="__date__" data-title="__year____place__"><img class="example-image" src="${PREFIX}thumbs/thumb___img__" alt="__place__" /></a>
+<a class="example-image-link" href="${PREFIX}images/__img__" data-lightbox="__post-time__" data-title="__year____place__"><img class="example-image" src="${PREFIX}thumbs/thumb___img__" alt="__place__" /></a>
 '''
 
 
@@ -43,6 +43,7 @@ def get_feed(generator):
                 img_item = img_item.replace('__year__', entry.meta['year'])
                 img_item = img_item.replace('__img__', entry.meta['img'])
                 img_item = img_item.replace('__place__', entry.meta['place'])
+                img_item = img_item.replace('__post-time__', entry.meta['post-time'])
                 desc.append(img_item)
             meta['description'] = '\n'.join(desc)
             meta['link'] = '${PREFIX}index.html'

@@ -11,7 +11,8 @@ class MDEntry(object):
     'The object properties reading from .md files'
 
     DEFAULT_HANDLERS = {'img': 'img_generator',
-                        'latex': 'latex_generator'}
+                        'latex': 'latex_generator',
+                        'file': 'file_generator'}
 
     def __init__(self, fname, mdvar):
         self.mdvar = mdvar
@@ -47,8 +48,8 @@ class MDEntry(object):
 
             for line in lines[l1+1:l2]:
                 info = line.split(':')
-                val = [x.strip(' ').strip('"') for x in info[1:]]
-                self.meta[info[0].strip(' ')] = ':'.join(val).strip('\n')
+                val = [x.strip().strip('"') for x in info[1:]]
+                self.meta[info[0].strip()] = ':'.join(val).strip('\n')
 
             if 'tag' in self.meta:
                 tags = self.meta['tag'].split(',')
@@ -82,12 +83,13 @@ class MDEntry(object):
         split[1] = re.sub('.*(\.[^\.]*)', new_name + r'\1', split[1])
         new_img_file = os.path.join(*split)
 
-        src = self.mdvar._path['src_prefix'] +\
-            self.mdvar._listinfo['list_root'] +\
-            '/' + img_file
-        dst = self.mdvar._path['dst_prefix'] +\
-            self.mdvar._listinfo['list_root'] +\
-            '/' + new_img_file
+        src = os.path.join(self.meta['md_directory'],
+                           img_file)
+
+        dst = src.replace(self.mdvar._path['src_prefix'],
+                          self.mdvar._path['dst_prefix']
+                          ).replace(
+                              img_file, new_img_file)
 
         dst_directory = os.path.split(dst)[0]
         if not os.path.exists(dst_directory):
@@ -108,9 +110,10 @@ class MDEntry(object):
         new_name = str(self.mdvar._listinfo['num']) + '_' +\
             str(self.latex_count) + '.png'
 
-        dst = self.mdvar._path['dst_prefix'] +\
-            self.mdvar._listinfo['list_root'] +\
-            '/css/' + new_name
+        dst = os.path.join(self.meta['md_directory'],
+                           'latex/' + new_name).replace(
+                               self.mdvar._path['src_prefix'],
+                               self.mdvar._path['dst_prefix'])
 
         dst_directory = os.path.split(dst)[0]
         if not os.path.exists(dst_directory):
@@ -134,10 +137,26 @@ class MDEntry(object):
         with open(dst, 'w') as f:
             f.write(png)
 
-        IMG_HTML.insert(1, 'css/' + new_name)
+        IMG_HTML.insert(1, 'latex/' + new_name)
         self.latex_count += 1
 
         return ''.join(IMG_HTML)
+
+    def file_generator(self, matchobj):
+        link_file = matchobj.group(1)
+
+        src = os.path.join(self.meta['md_directory'],
+                           link_file)
+
+        dst = src.replace(self.mdvar._path['src_prefix'],
+                          self.mdvar._path['dst_prefix'])
+
+        dst_directory = os.path.split(dst)[0]
+        if not os.path.exists(dst_directory):
+            MiduHelper.mkdir_p(dst_directory)
+        shutil.copyfile(src, dst)
+
+        return link_file
 
     def get_mdlocal(self):
         return copy.deepcopy(self.meta)

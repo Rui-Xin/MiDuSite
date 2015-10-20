@@ -1,6 +1,17 @@
 <div class="container">
-	${LOCAL:name}
-	${LOCAL:university}
-	${LOCAL:profile}
-	${LOCAL:content}
+	<div class="cv-body">
+	<div class="cv-header">
+		<div class="cv-profile">
+			<img class="img-circle" src="${LOCAL:profile}"></img>
+		</div>
+		<div class="cv-headertext">
+			<h1>${LOCAL:name}</h1>
+			<p class="subtitle">${LOCAL:university}</p>
+			<p>${LOCAL:description}</p>
+		</div>
+	</div>
+	<div class="cv-content">
+		${LOCAL:content}
+	</div>
+	</div>
 </div>

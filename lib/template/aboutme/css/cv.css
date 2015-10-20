@@ -1,0 +1,73 @@
+.cv-headertext h1 {
+	font-weight: 200;
+}
+
+.cv-body {
+	margin-top: 1em;
+	font-weight: 200;
+	font-size: 1.4em;
+	letter-spacing: 0.2px;
+}
+
+.cv-body strong {
+	font-weight: 500;
+}
+
+.cv-body h2 {
+	font-size: 1.8em;
+	font-weight: 200;
+}
+
+.cv-body .subtitle {
+	font-size: 0.8em;
+	font-weight: 500;
+	text-transform: uppercase;
+	color: #b0b0b0;
+}
+
+.cv-header {
+	width: 100%;
+	display: inline-block;
+}
+
+.cv-headertext {
+	width: auto;
+}
+
+.cv-profile img {
+	width: 100%;
+	float: none;
+}
+
+.cv-content>h2 {
+	color: #b0b0b0;
+	border-bottom: 1px solid #b0b0b0;
+	font-weight: 100;
+}
+
+.cv-content>ul {
+	padding-left: 0.5em;
+}
+
+.cv-content>ul>li {
+	list-style: none;
+	list-style-position: inside;
+}
+
+.cv-content>ul>li:hover {
+	background-color: #efefef;
+}
+
+.cv-content>ul>li>ul>li {
+	list-style: circle;
+}
+
+@media screen and (min-width: 768px) {
+	.cv-profile img {
+		width: 20%;
+		float: right;
+	}
+	.cv-headertext {
+		width: 50%;
+	}
+}
