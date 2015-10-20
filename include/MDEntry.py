@@ -80,7 +80,7 @@ class MDEntry(object):
         img_file = matchobj.group(1)
         split = list(os.path.split(img_file))
         new_name = str(self.mdvar._listinfo['num']) + '_' + str(self.img_count)
-        split[1] = re.sub('.*(\.[^\.]*)', new_name + r'\1', split[1])
+        split[1] = re.sub('.*(\.[^\.]*)', new_name + r'\1'.lower(), split[1])
         new_img_file = os.path.join(*split)
 
         src = os.path.join(self.meta['md_directory'],
