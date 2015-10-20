@@ -88,6 +88,8 @@ class MDGenerator(object):
         self.copy_directory('css')
         # JS
         self.copy_directory('js')
+        # UTIL
+        self.copy_directory('util')
 
         if 'pre_process' in self.default:
             to_process = self.default['pre_process'].split(',')
@@ -384,8 +386,16 @@ class MDGenerator(object):
                  self.mdvar._path['root'] + '/' +
                  target)
 
-        targs = [self.mdvar._path['tmpl_prefix'] + target,
-                 self.mdvar._path['src_prefix'] + target]
+        targs = []
+
+        if target in self.mdvar._global:
+            for tgt in self.mdvar._global[target].split(',')[::-1]:
+                targs.append('lib/' + target + '/' + tgt)
+        else:
+            targs.append('lib/' + target + '/default')
+
+        targs.extend([self.mdvar._path['tmpl_prefix'] + target,
+                      self.mdvar._path['src_prefix'] + target])
         dst = self.mdvar._path['dst_prefix'] +\
             self.mdvar._path['root'] +\
             '/' + target

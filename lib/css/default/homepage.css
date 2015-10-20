@@ -24,6 +24,7 @@
 	min-height: 12%;
 	z-index: 2;
 	background: white;
+	margin-bottom: 5em;
 }
 
 .navbar-toggle {
@@ -78,6 +79,7 @@
 	}
 	.sections>li {
 		margin-right: 1em;
+		width: 8em;
 	}
 }
 
