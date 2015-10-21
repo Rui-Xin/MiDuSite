@@ -161,8 +161,16 @@ def produce_rss(generator):
                        reverse=True)[:15]:
         rss.append('<item>')
         rss.append('<title>' + item[1]['title'] + '</title>')
-        rss.append('<link>' + item[1]['link'] + '</link>')
-        rss.append('<description>' + item[1]['description'] + '</description>')
+        rss.append('<link>' +
+                   item[1]['link'].replace(
+                       '${PREFIX}',
+                       '${PREFIX}' + item[1]['section'] + '/') +
+                   '</link>')
+        rss.append('<description>' +
+                   item[1]['description'].replace(
+                       '${PREFIX}',
+                       '${PREFIX}' + item[1]['section'] + '/') +
+                   '</description>')
         rss.append('</item>')
 
     rss.append(copy.deepcopy(RSS_END))
