@@ -1,6 +1,7 @@
 [default]
 startpage=index[dst:index]
 pre_process=SectionProcessor[name:copy_files]
+rss_handler=HPUtility[name:produce_rss]
 [global]
 sitename=Midu
 partitions=tag,year

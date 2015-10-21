@@ -76,6 +76,13 @@ def sites(generator):
     return '\n'.join(lines)
 
 
+def get_feed(generator):
+    feeds = []
+    for site in generator.site_cached.values():
+        feeds.extend(site.generator.get_feed())
+    return feeds
+
+
 RECENT_ITEM = '''
 <div class="posts">
 	<h1 class="content-subhead">__action__</h1>
@@ -102,13 +109,10 @@ RECENT_ITEM = '''
 '''
 
 def get_recent(generator):
-    lines = []
-    feeds = []
-    for site in generator.site_cached.values():
-        feeds.extend(site.generator.get_feed())
-
+    feeds = get_feed(generator)
     feeds_ordered = sorted(feeds, key=lambda x: x[0], reverse=True)[:10]
 
+    lines = []
     for feed in feeds_ordered:
         meta = feed[1]
         recent_item = copy.copy(RECENT_ITEM)
@@ -121,3 +125,49 @@ def get_recent(generator):
         lines.append(recent_item)
 
     return '\n'.join(lines)
+
+
+RSS_HEAD = '''
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+'''
+RSS_END = '''
+</channel>
+</rss>
+'''
+
+
+def produce_rss(generator):
+    if 'rss_prefix' in generator.mdvar._global:
+        prefix = generator.mdvar._global['rss_prefix']
+        if not prefix.endswith('/'):
+            prefix += '/'
+    else:
+        prefix = ''
+
+    rss = [copy.deepcopy(RSS_HEAD)]
+    rss.append('<title>' +
+               generator.mdvar._global['sitename'] +
+               '</title>')
+    rss.append('<link>' +
+               prefix +
+               '</link>')
+    rss.append('<description>' +
+               generator.mdvar._global['sitename'] +
+               '</description>')
+    for item in sorted(get_feed(generator),
+                       key=lambda x: x[0],
+                       reverse=True)[:15]:
+        rss.append('<item>')
+        rss.append('<title>' + item[1]['title'] + '</title>')
+        rss.append('<link>' + item[1]['link'] + '</link>')
+        rss.append('<description>' + item[1]['description'] + '</description>')
+        rss.append('</item>')
+
+    rss.append(copy.deepcopy(RSS_END))
+
+    fname = generator.mdvar._path['dst_prefix'] + 'rss.xml'
+    content = '\n'.join(rss).replace('${PREFIX}', prefix).strip('\n')
+    with open(fname, 'w') as f:
+        f.write(content)

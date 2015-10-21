@@ -3,6 +3,7 @@ parser=BlogEntry.BlogEntry
 startpage=index[dst:index]
 pre_process=BlogUtility[name:pre_process]
 feed=BlogFeed[name:get_feed]
+rss_handler=BlogFeed[name:produce_rss]
 [global]
 blogname=MiduBlog
 partitions=tag,year

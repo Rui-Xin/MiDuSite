@@ -16,7 +16,8 @@ from collections import OrderedDict
 
 class MDGenerator(object):
     initialized = False
-    DEFAULT_HANDLERS = [('GLOBAL', 'generateGlobal'),
+    DEFAULT_HANDLERS = [('RSS', 'generateRSS'),
+                        ('GLOBAL', 'generateGlobal'),
                         ('LOCAL', 'generateLocal'),
                         ('PATH', 'generatePath'),
                         ('CALL', 'generateCall'),
@@ -64,6 +65,7 @@ class MDGenerator(object):
         if 'nav' in self.default:
             self.loaded['snippet'].setContent('navigator', self.default['nav'])
 
+        self.rss = False
         self.initialized = True
 
     def generate(self):
@@ -98,6 +100,8 @@ class MDGenerator(object):
 
         page = self.generatePage(matchobj)
         print page + ' generated.'
+        if self.rss:
+            self.produce_rss()
         return page
 
     def addHandler(self, syntax, handler):
@@ -303,6 +307,17 @@ class MDGenerator(object):
         call = _call.group(1)
         return self.process_callsite(call)
 
+    def generateRSS(self, _rss):
+        self.rss = True
+        if 'rss_handler' not in self.default:
+            return ''
+        if 'rss_prefix' in self.mdvar._global:
+            prefix = self.mdvar._global['rss_prefix']
+        else:
+            prefix = ''
+
+        return os.path.join(prefix, 'rss.xml')
+
     def generateGlobal(self, _global):
         varname = _global.group(1)
         if varname in self.mdvar._global:
@@ -409,3 +424,12 @@ class MDGenerator(object):
             return self.process_callsite(self.default['feed'])
         else:
             return []
+
+    def produce_rss(self):
+        if not self.rss:
+            return
+
+        if 'rss_handler' not in self.default:
+            return
+
+        self.process_callsite(self.default['rss_handler'])

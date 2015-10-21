@@ -67,7 +67,7 @@ def generate_content(generator, partition):
 
 COVER = '''
 <div class="container">
-        <h1><a class="" href="${PATH:root}/index.html">${GLOBAL:camerarollname}</a></h1>
+        <h1><a class="" href="${PATH:root}/index.html">${GLOBAL:camerarollname}</a><a href="${RSS:}"><span class="glyphicon glyphicon-signal"></span></a></h1>
         <p>${GLOBAL:desc}</p>
 </div>
 <div class="subnav container">
